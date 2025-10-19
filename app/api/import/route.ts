@@ -6,28 +6,31 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
+export const runtime = 'nodejs';
+
 export async function OPTIONS() {
   return withCors(NextResponse.json({ ok: true }));
 }
 
 export async function POST(req: Request) {
-  const idempotencyKey = req.headers.get('Idempotency-Key');
-  if (!idempotencyKey) {
-    return withCors(NextResponse.json({ error: 'Idempotency-Key header required' }, { status: 400 }));
-  }
+  try {
+    const idempotencyKey = req.headers.get('Idempotency-Key');
+    if (!idempotencyKey) {
+      return withCors(NextResponse.json({ error: 'Idempotency-Key header required' }, { status: 400 }));
+    }
 
-  // 冪等チェック
-  const cached = await Repositories.getIdempotency(idempotencyKey);
-  if (cached) {
-    return withCors(NextResponse.json(cached));
-  }
+    // 冪等チェック
+    const cached = await Repositories.getIdempotency(idempotencyKey);
+    if (cached) {
+      return withCors(NextResponse.json(cached));
+    }
 
-  const json = await req.json().catch(() => null);
-  const parse = ImportBodySchema.safeParse(json);
-  if (!parse.success) {
-    return withCors(NextResponse.json({ error: 'Invalid body', issues: parse.error.issues }, { status: 400 }));
-  }
-  const body = parse.data;
+    const json = await req.json().catch(() => null);
+    const parse = ImportBodySchema.safeParse(json);
+    if (!parse.success) {
+      return withCors(NextResponse.json({ error: 'Invalid body', issues: parse.error.issues }, { status: 400 }));
+    }
+    const body = parse.data;
 
   // 画像自動解決を無効化（元URLをそのまま保存）
   // await forceSelfHostAllImages(body).catch(() => {});
@@ -71,9 +74,13 @@ export async function POST(req: Request) {
     });
   }
 
-  const result = { topicId, rallyIds };
-  await Repositories.setIdempotency(idempotencyKey, result);
-  return withCors(NextResponse.json(result));
+    const result = { topicId, rallyIds };
+    await Repositories.setIdempotency(idempotencyKey, result);
+    return withCors(NextResponse.json(result));
+  } catch (e: any) {
+    console.error('Import error:', e);
+    return withCors(NextResponse.json({ error: e?.message || 'Import failed', stack: e?.stack }, { status: 500 }));
+  }
 }
 
 function withCors(res: NextResponse) {
