@@ -48,6 +48,10 @@ export async function POST(req: Request) {
           metadata: {},
         } as any;
       }
+      
+      // ここで target は必ず定義されている
+      if (!target) continue;
+      
       const urls = list.map(x => x.url);
       const meta = Object.assign({}, target.metadata || {});
       (meta as any).imageUrls = urls;
