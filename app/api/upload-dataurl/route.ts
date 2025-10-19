@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/db/supabase';
-import crypto from 'node:crypto';
 
 export const runtime = 'edge';
 
