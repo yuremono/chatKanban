@@ -2,6 +2,13 @@
 import { supabase } from './supabase';
 import type { Topic, Rally, Message } from '@/packages/shared/Types';
 
+// Supabaseが利用不可の場合はエラーをスロー
+function ensureSupabase() {
+  if (!supabase) {
+    throw new Error('Supabase is not configured');
+  }
+}
+
 export const SupabaseRepositories = {
   // Topics
   async createTopic(input: Omit<Topic, 'createdAt' | 'updatedAt'>): Promise<Topic> {

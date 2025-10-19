@@ -27,7 +27,7 @@ export type Rally = {
   id: string;
   topicId: string;
   index: number;
-  createdAt: string;
+  createdAt?: string; // Supabaseで自動生成されるため省略可能
 };
 
 export type MessageRole = 'user' | 'assistant' | 'system';
