@@ -138,9 +138,9 @@
 
   /* アプリコンテナ */
   .app_container {
-    @apply grid h-screen relative;
+    @apply  h-screen relative;
     transition: var(--tr) cubic-bezier(0.4, 0, 0.2, 1);
-    gap: var(--gap) var(--navW);
+    /* gap: var(--gap) var(--navW); */
   }
 
   @media (min-width: 1024px) {
