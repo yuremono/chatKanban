@@ -32,9 +32,12 @@
   async function onClickSend() {
     try {
       const data = extractThread();
-      const totalImages = (data.messages || []).reduce((sum, m) => sum + (((m as any).metadata?.imageUrls || []).length), 0);
+      const urls = collectLh3ImageUrls();
+      const totalImages = urls.length;
       const topicIdForName = `topic_${data.threadId}`;
-      const resp = await chrome.runtime.sendMessage({ type: 'CK_IMPORT', data, topicIdForName });
+      console.log('[ContentScript] Extracted data:', data);
+      console.log('[ContentScript] Image URLs:', urls);
+      const resp = await chrome.runtime.sendMessage({ type: 'CK_IMPORT', data, urls, topicIdForName });
       if (resp?.ok) alert(`Imported: ${resp.result?.topicId || ''}\n画像: ${totalImages}枚`);
       else alert(`Send failed: ${resp?.error || resp?.status || 'unknown'}`);
     } catch (e: any) {

@@ -230,6 +230,14 @@
       const totalImages = (data.messages || []).reduce((sum, m) => sum + ((m.metadata?.imageUrls || []).length), 0);
       const topicIdForName = `topic_${data.threadId}`;
       
+      // 画像URLを収集（metadata.imageUrlsから抽出）
+      const urls = [];
+      for (const m of (data.messages || [])) {
+        const imageUrls = m.metadata?.imageUrls || [];
+        urls.push(...imageUrls);
+      }
+      console.log('[ContentScript] Extracted image URLs:', urls);
+      
       // 現在の送信先環境を取得
       const settings = await new Promise(resolve => {
         chrome.storage.sync.get(['chatKanbanApiTarget'], result => {
@@ -266,7 +274,7 @@
         }
       }
       
-      const resp = await chrome.runtime.sendMessage({ type:'CK_IMPORT', data, topicIdForName });
+      const resp = await chrome.runtime.sendMessage({ type:'CK_IMPORT', data, urls, topicIdForName });
       
       if (resp?.ok) {
         // 送信成功したら記録（環境ごとに別管理）
