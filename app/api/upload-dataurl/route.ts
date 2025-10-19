@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
+import { supabase } from '@/lib/db/supabase';
 import crypto from 'node:crypto';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function OPTIONS() {
   return withCors(NextResponse.json({ ok: true }));
@@ -24,26 +23,44 @@ export async function POST(req: Request) {
     const buf = Buffer.from(b64, 'base64');
     const ext = guessExtByMime(mime);
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    await fs.mkdir(uploadDir, { recursive: true });
-
     let base = sanitizeBase(filename || '');
     if (!base) base = `${Date.now()}_${crypto.randomUUID()}`;
     let fileName = `${base}${ext}`;
-    // 同名が存在する場合は連番を付ける
-    let i = 1;
-    while (true) {
-      try {
-        await fs.access(path.join(uploadDir, fileName));
-        fileName = `${base}_${String(i++).padStart(2, '0')}${ext}`;
-      } catch {
-        break;
+
+    // Supabase Storageにアップロード
+    if (supabase) {
+      // 同名ファイルが存在する場合は連番を付ける
+      let finalFileName = fileName;
+      let i = 1;
+      while (true) {
+        const { data: existing } = await supabase.storage
+          .from('uploads')
+          .list('', { limit: 1, search: finalFileName });
+        
+        if (!existing || existing.length === 0) break;
+        finalFileName = `${base}_${String(i++).padStart(2, '0')}${ext}`;
       }
+
+      const { data, error } = await supabase.storage
+        .from('uploads')
+        .upload(finalFileName, buf, {
+          contentType: mime,
+          upsert: false
+        });
+
+      if (error) {
+        return withCors(NextResponse.json({ error: error.message }, { status: 500 }));
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(data.path);
+
+      return withCors(NextResponse.json({ url: publicUrl, contentType: mime }));
+    } else {
+      // Supabaseが設定されていない場合はエラー
+      return withCors(NextResponse.json({ error: 'Storage not configured' }, { status: 500 }));
     }
-
-    await fs.writeFile(path.join(uploadDir, fileName), buf);
-
-    return withCors(NextResponse.json({ url: `/uploads/${fileName}`, contentType: mime }));
   } catch (e: any) {
     return withCors(NextResponse.json({ error: e?.message || 'upload-dataurl failed' }, { status: 500 }));
   }
