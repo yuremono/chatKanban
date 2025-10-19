@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Chat Kanban Importer",
+  "version": "0.1.0",
+  "description": "Send chat threads to Chat Kanban.",
+  "permissions": ["storage", "scripting", "activeTab", "cookies", "downloads"],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://*.openai.com/*",
+    "https://gemini.google.com/*",
+    "https://lh3.googleusercontent.com/*",
+    "https://*.googleusercontent.com/*",
+    "http://localhost:3000/*",
+    "http://localhost:3001/*"
+  ],
+  "background": {
+    "service_worker": "ServiceWorker.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["ContentScript.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_title": "Send to Chat Kanban"
+  },
+  "options_page": "Options.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://*.openai.com/*",
+        "https://gemini.google.com/*"
+      ],
+      "js": ["ContentScript.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
+

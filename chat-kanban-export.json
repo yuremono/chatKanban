@@ -1,0 +1,161 @@
+{
+  "exportedAt": "2025-10-19T10:08:20.867Z",
+  "data": [
+    {
+      "topic": {
+        "id": "topic_mappa7352e4cf8cd9dd0hlja",
+        "userId": "anonymous",
+        "title": "Google Gemini",
+        "tags": [],
+        "visibility": "private",
+        "deletedAt": null,
+        "createdAt": "2025-10-19T10:07:01.975Z",
+        "updatedAt": "2025-10-19T10:07:01.975Z"
+      },
+      "rallies": [
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "topicId": "topic_mappa7352e4cf8cd9dd0hlja",
+          "index": 0,
+          "createdAt": "2025-10-19T10:07:01.976Z"
+        }
+      ],
+      "messages": [
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_3hftzop0l9b",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "user",
+          "content": "この画像を、荒木裕彦のジョジョの奇妙な冒険みたいな画風で、新しい画像を作ってください",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:00:32.026Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_oy19kdaturm",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "assistant",
+          "content": "承知いたしました。荒木飛呂彦先生のジョジョの奇妙な冒険風の画風で、新しい画像を生成します。",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:00:32.026Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_iaklyuc8irp",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "user",
+          "content": "この画像を、荒木裕彦のジョジョの奇妙な冒険みたいな画風で、新しい画像を作ってください",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:03:46.393Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_1055054pxah",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "assistant",
+          "content": "承知いたしました。荒木飛呂彦先生のジョジョの奇妙な冒険風の画風で、新しい画像を生成します。",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:03:46.393Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_mdtcg1ee0r",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "user",
+          "content": "この画像を、荒木裕彦のジョジョの奇妙な冒険みたいな画風で、新しい画像を作ってください",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:04:27.664Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_3jjdnynm1mk",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "assistant",
+          "content": "承知いたしました。荒木飛呂彦先生のジョジョの奇妙な冒険風の画風で、新しい画像を生成します。",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:04:27.665Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_tduxykqsvu",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "user",
+          "content": "この画像を、荒木裕彦のジョジョの奇妙な冒険みたいな画風で、新しい画像を作ってください",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:04:40.022Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_3gyicvm88vf",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "assistant",
+          "content": "承知いたしました。荒木飛呂彦先生のジョジョの奇妙な冒険風の画風で、新しい画像を生成します。",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:04:40.022Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_j9d564abx9s",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "user",
+          "content": "この画像を、荒木裕彦のジョジョの奇妙な冒険みたいな画風で、新しい画像を作ってください",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:04:55.915Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_u83c11eaa4",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "assistant",
+          "content": "承知いたしました。荒木飛呂彦先生のジョジョの奇妙な冒険風の画風で、新しい画像を生成します。",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:04:55.916Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_pc3k968q7cg",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "user",
+          "content": "この画像を、荒木裕彦のジョジョの奇妙な冒険みたいな画風で、新しい画像を作ってください",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:07:01.976Z"
+        },
+        {
+          "id": "rally_mappa7352e4cf8cd9dd0hlja_0_6a4bgggz4bg",
+          "rallyId": "rally_mappa7352e4cf8cd9dd0hlja_0",
+          "role": "assistant",
+          "content": "承知いたしました。荒木飛呂彦先生のジョジョの奇妙な冒険風の画風で、新しい画像を生成します。",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:07:01.977Z"
+        }
+      ]
+    },
+    {
+      "topic": {
+        "id": "topic_mapp89f8b643bd4b23e3hlja",
+        "userId": "anonymous",
+        "title": "Google Gemini",
+        "tags": [],
+        "visibility": "private",
+        "deletedAt": null,
+        "createdAt": "2025-10-19T10:00:03.940Z",
+        "updatedAt": "2025-10-19T10:00:03.940Z"
+      },
+      "rallies": [
+        {
+          "id": "rally_mapp89f8b643bd4b23e3hlja_0",
+          "topicId": "topic_mapp89f8b643bd4b23e3hlja",
+          "index": 0,
+          "createdAt": "2025-10-19T10:00:03.941Z"
+        }
+      ],
+      "messages": [
+        {
+          "id": "rally_mapp89f8b643bd4b23e3hlja_0_rjegwfrikh",
+          "rallyId": "rally_mapp89f8b643bd4b23e3hlja_0",
+          "role": "user",
+          "content": "何か適当に幾何学模様のイラストを書いてください",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:00:03.941Z"
+        },
+        {
+          "id": "rally_mapp89f8b643bd4b23e3hlja_0_0mpnesi30eb",
+          "rallyId": "rally_mapp89f8b643bd4b23e3hlja_0",
+          "role": "assistant",
+          "content": "承知いたしました。幾何学模様のイラストを生成します。",
+          "model": "unknown",
+          "timestamp": "2025-10-19T10:00:03.941Z"
+        }
+      ]
+    }
+  ]
+}

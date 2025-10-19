@@ -1,0 +1,389 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * { 
+    border-color: hsl(var(--border));
+    box-sizing: border-box;
+  }
+  html {
+    overflow-x: hidden;
+    width: 100%;
+    font-size: 14px;
+  }
+  body { 
+    background-color: var(--bgColor);
+    color: var(--tx);
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    transition: background-color var(--tr, 0.4s) ease, color var(--tr, 0.4s) ease;
+  }
+  h2 {
+    font-size: 1.25em;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    margin-block: 0;
+  }
+  /* 全ての要素で固定幅を防ぐ */
+  * {
+    max-width: 100%;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* ドラッグ可能サイドバー用CSS（index.htmlから統合） */
+/* Tailwindのユーティリティクラスよりも優先されるように@layerの外に配置 */
+  .draggable-layout {
+    /* ライトモード色変数 */
+    --mc: #072f5e;
+    --sc: #6bb6ff;
+    --ac: #ff6b6b;
+    --bc: #eee;
+    --tx: #333333;
+    --bk: #000000;
+    --wh: #ffffff;
+    --gr: #ddd;
+    --bgColor: var(--wh);
+    --navBg: var(--wh);
+    --modelBg: var(--wh);
+    --borderColor: var(--gr);
+    --line: 1px solid var(--gr);
+    --rad: 12px;
+    --shadow: 0 2px 10px var(--gr);
+    --tr: 0.4s;
+    --navW: 100%;
+    --inline: 16px;
+    --gap: 10px;
+    --gapH: calc(var(--gap) / 2);
+  }
+
+  @media (min-width: 1024px) {
+    .draggable-layout {
+      --navW: 320px;
+      --inline: 20px;
+      --gap: 16px;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .draggable-layout {
+      --navW: 360px;
+    }
+  }
+
+  [data-theme="dark"] .draggable-layout,
+  [data-theme="dark"] {
+    --mc: #65b2ff;
+    --sc: #4a90e2;
+    --ac: #ff8a8a;
+    --bc: #222;
+    --tx: #ffffff;
+    --bk: #000;
+    --wh: #fff;
+    --gr: #666;
+    --bgColor: var(--bk);
+    --navBg: var(--bk);
+    --modelBg: var(--bk);
+  }
+
+  /* アプリコンテナ */
+  .app_container {
+    @apply grid h-screen relative;
+    transition: var(--tr) cubic-bezier(0.4, 0, 0.2, 1);
+    gap: var(--gap) var(--navW);
+  }
+
+  @media (min-width: 1024px) {
+    .app_container {
+      padding-inline: var(--navW) 0;
+    }
+    
+    .app_container.right {
+      padding-inline: 0 var(--navW);
+    }
+  }
+
+  .app_container.center {
+    padding-inline: 0;
+  }
+
+  /* センターモード時のコンテンツ調整 */
+  .app_container.center .content_section {
+    width: calc(50% - var(--navW) / 2);
+  }
+
+  /* メインコンテンツエリア */
+  .main_content {
+    @apply overflow-y-auto flex-1;
+    padding: var(--inline);
+    gap: var(--gap) var(--navW);
+  }
+
+  /* コンテンツセクション */
+  .content_section {
+        width:100%;
+    border-radius: var(--rad);
+    border: var(--line);
+    transition: all var(--tr) ease;
+  }
+
+  .content_section:is(.center *) {
+    width: calc(50% - var(--navW) / 2);
+  }
+
+  .content_section h1 {
+    color: var(--mc);
+    margin-bottom: var(--gap);
+  }
+
+  .content_section h2 {
+    color: var(--mc);
+  }
+
+  /* KanbanCard用のカスタムスタイル */
+  .topic_header {
+    border-bottom: var(--line);
+    color: var(--tx);
+  }
+
+  .topic_header:hover {
+    background-color: var(--bc);
+  }
+
+  .topic_title {
+    color: var(--tx);
+  }
+
+  .topic_meta {
+    color: var(--tx);
+  }
+
+  .topic_meta .user_name {
+    color: var(--tx);
+  }
+
+  .rally_list_bg {
+    border-bottom: var(--line);
+  }
+
+
+  .rally_header:hover {
+    background: var(--bc);
+  }
+  
+  .rally_header_text {
+    color: var(--tx);
+  }
+
+  .message_user {
+    background-color: var(--mc);
+    color: var(--wh);
+  }
+
+  .message_assistant {
+    background-color: var(--bc);
+    color: var(--tx);
+  }
+
+  /* ナビゲーションセクション */
+  .nav_section {
+    @apply absolute flex flex-col bottom-0 z-50;
+    width: var(--navW);
+    padding: var(--inline);
+    gap: var(--gap);
+    box-shadow: var(--shadow);
+    height: 100%;
+    transition: var(--tr);
+  }
+
+  @media (min-width: 1024px) {
+    .nav_section:is(.right *) {
+      left: calc(100% - var(--navW));
+    }
+
+    .nav_section:is(.center *) {
+      left: calc(50% - var(--navW) / 2);
+    }
+  }
+
+  .nav_section.left {
+    left: 0;
+  }
+
+  .nav_section.right {
+    left: calc(100% - var(--navW));
+  }
+
+  .nav_section.center {
+    left: calc(50% - var(--navW) / 2);
+  }
+
+  /* ドラッグエリア */
+  .drag_area {
+    @apply absolute top-0 left-0 right-0 bottom-0 cursor-move;
+    z-index: 10;
+  }
+
+  /* ナビゲーションウィンドウ */
+  .nav_window {
+    @apply relative;
+    padding: var(--inline);
+    border-radius: var(--rad);
+    border: var(--line);
+    height: 100%;
+    z-index: 20;
+    color: var(--tx);
+  }
+
+  @media (min-width: 1024px) {
+    .nav_window {
+      height: 60%;
+    }
+  }
+  
+  .nav_window a {
+    color: var(--tx);
+    text-decoration: none;
+  }
+
+  /* ナビゲーションコンテンツ */
+  .nav_content {
+    gap: var(--gap);
+  }
+
+  .navigation {
+    gap: var(--gapH);
+    padding-block: var(--gapH);
+  }
+
+  .navigation a {
+    color: var(--tx);
+    border-radius: var(--rad);
+    padding: var(--rad);
+    transition: all var(--tr) ease;
+  }
+
+  .navigation a:hover {
+    background: var(--mc);
+    color: var(--wh);
+  }
+
+  /* コントロールボタン */
+  .controls {
+    display: flex;
+    gap: 10px;
+  }
+
+  .control_btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: var(--mc);
+    cursor: pointer;
+    transition: all var(--tr) ease;
+  }
+
+  .control_btn:hover {
+    background: var(--mc);
+    transform: translateY(-2px);
+  }
+
+  .txwh {
+    color: var(--wh);
+  }
+
+  /* ドラッグ中のスタイル */
+  .nav_section.dragging {
+    transform: rotate(1deg);
+    box-shadow: 0 10px var(--inline) rgba(0, 0, 0, 0.3);
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .app_container {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: 1fr auto;
+      padding: 0 !important;
+    }
+
+    .app_container.left,
+    .app_container.right,
+    .app_container.center {
+      padding: 0 !important;
+    }
+
+    .nav_section {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50vh;
+      width: 100% !important;
+      transform: translateY(100%);
+      transition: transform var(--tr) ease;
+      flex-direction: row;
+    }
+
+    .nav_section.open {
+      transform: translateY(0);
+    }
+
+    .drag_area {
+      display: none;
+    }
+
+    .content_section {
+      width: 100%;
+    }
+  }

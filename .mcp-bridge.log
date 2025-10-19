@@ -1,0 +1,18 @@
+(node:41035) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/yanoseiji/Desktop/chatKanban/scripts/devtools-mcp-bridge.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/yanoseiji/Desktop/chatKanban/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+DevTools MCP bridge listening on :7779
+file:///Users/yanoseiji/Desktop/chatKanban/scripts/devtools-mcp-bridge.js:135
+    ws.on('close', () => { if (!targetRequestId) reject(new Error('request not captured')); });
+                                                        ^
+
+Error: request not captured
+    at WebSocket.<anonymous> (file:///Users/yanoseiji/Desktop/chatKanban/scripts/devtools-mcp-bridge.js:135:57)
+    at WebSocket.emit (node:events:518:28)
+    at WebSocket.emitClose (/Users/yanoseiji/Desktop/chatKanban/node_modules/ws/lib/websocket.js:272:10)
+    at Socket.socketOnClose (/Users/yanoseiji/Desktop/chatKanban/node_modules/ws/lib/websocket.js:1341:15)
+    at Socket.emit (node:events:518:28)
+    at TCP.<anonymous> (node:net:351:12)
+
+Node.js v22.15.0

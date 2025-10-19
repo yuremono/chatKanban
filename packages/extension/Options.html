@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Chat Kanban Options</title>
+    <style>
+      body { font-family: -apple-system, system-ui; padding: 16px; }
+      label { display: block; margin-top: 12px; }
+      input { width: 100%; padding: 8px; margin-top: 4px; }
+      button { margin-top: 12px; padding: 8px 12px; }
+    </style>
+  </head>
+  <body>
+    <h1>Chat Kanban 設定</h1>
+    <label>
+      API Base URL
+      <input id="apiBase" placeholder="http://localhost:3000" />
+    </label>
+    <label>
+      Token (任意)
+      <input id="token" placeholder="" />
+    </label>
+    <button id="save">保存</button>
+    <script>
+      const apiBase = document.getElementById('apiBase');
+      const token = document.getElementById('token');
+      const save = document.getElementById('save');
+
+      chrome.storage.sync.get(['chatKanbanApiBase', 'chatKanbanToken'], (res) => {
+        apiBase.value = res.chatKanbanApiBase || 'http://localhost:3000';
+        token.value = res.chatKanbanToken || '';
+      });
+
+      save.addEventListener('click', () => {
+        chrome.storage.sync.set({
+          chatKanbanApiBase: apiBase.value,
+          chatKanbanToken: token.value,
+        }, () => alert('保存しました'));
+      });
+    </script>
+  </body>
+  </html>
+
+

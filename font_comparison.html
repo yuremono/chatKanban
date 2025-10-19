@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Font Comparison — System Fonts vs Google Fonts</title>
+  <!-- Google Fonts を読み込む -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;300;400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@200;300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --gap:16px;
+      --panel-bg:#ffffff;
+      --muted:#6b7280;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f3f4f6;color:#111}
+    .wrap{max-width:1200px;margin:28px auto;padding:20px;box-sizing:border-box}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 22px}
+    .control{background:var(--panel-bg);padding:10px;border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,0.04);min-width:180px}
+    .control label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .control input[type=text], .control textarea{width:100%;box-sizing:border-box;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:14px}
+    .control textarea{height:68px;resize:vertical}
+    .row{display:grid;grid-template-columns:repeat(9,1fr);gap:var(--gap)}
+
+    .panel{background:linear-gradient(180deg,#fff,#fbfbfd);padding:18px;border-radius:12px;border:1px solid #e6e7eb;min-height:280px;display:flex;flex-direction:column}
+    .panel .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .font-name{font-size:13px;font-weight:600}
+    .available{font-size:12px;color:var(--muted)}
+
+    .sample{flex:1;display:flex;flex-direction:column;gap:12px}
+    .sample .big{font-size:48px;line-height:1.02;margin:0}
+    .sample .medium{font-size:20px;margin:0}
+    .sample .small{font-size:13px;color:var(--muted);margin:0}
+
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+
+    /* 各列のフォント強制 */
+    .col-apple{font-family:-apple-system, system-ui, "Helvetica Neue", Arial, sans-serif}
+    .col-segoe{font-family:"Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif}
+    .col-roboto{font-family:Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+    .col-inter{font-family:Inter, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+    .col-opensans{font-family:"Open Sans", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+    .col-sourcesans{font-family:"Source Sans Pro", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+    .col-lato{font-family:Lato, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+    .col-worksans{font-family:"Work Sans", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+    .col-nunito{font-family:"Nunito Sans", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+    .col-dmsans{font-family:"DM Sans", system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+    .col-poppins{font-family:Poppins, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif}
+
+    /* レスポンシブ */
+    @media (max-width:1600px){.row{grid-template-columns:repeat(6,1fr)}}
+    @media (max-width:1200px){.row{grid-template-columns:repeat(4,1fr)}}
+    @media (max-width:900px){.row{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:600px){.row{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:400px){.row{grid-template-columns:1fr}} 
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>System Fonts vs Google Fonts 比較</h1>
+        <p class="lead">システムフォントとGoogle Fontsを並べて比較。Appleシステム・Segoe UIに似ているフォントを確認できます。</p>
+      </div>
+      <div style="text-align:right;font-size:12px;color:var(--muted)">
+        表示環境: システムフォントとGoogle Fontsの表示を比較。InterはAppleシステム風、Open SansはSegoe UI風です。
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="control" style="flex:2;min-width:320px">
+        <label>表示するテキスト（日本語・英語・数字など自由）</label>
+        <textarea id="textInput">The Quick Brown Fox Jumps Over The Lazy Dog. いろはにほへとちりぬるを。1234567890</textarea>
+      </div>
+      <div class="control">
+        <label>サイズ (px)</label>
+        <input id="sizeInput" type="range" min="10" max="120" value="48">
+        <div style="font-size:12px;margin-top:6px;color:var(--muted)">現在: <span id="sizeVal">48</span>px</div>
+      </div>
+      <div class="control">
+        <label>ウェイト (weight)</label>
+        <input id="weightInput" type="range" min="100" max="900" step="100" value="400">
+        <div style="font-size:12px;margin-top:6px;color:var(--muted)">現在: <span id="weightVal">400</span></div>
+      </div>
+      <div class="control">
+        <label>テキスト変換</label>
+        <select id="transformSelect">
+          <option value="none">そのまま</option>
+          <option value="uppercase">大文字 (英語のみ)</option>
+          <option value="lowercase">小文字 (英語のみ)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="panel col-apple" id="applePanel">
+        <div class="meta"><div class="font-name">-apple-system</div><div class="available" id="appleAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="appleBig"></p>
+          <p class="medium" id="appleMed"></p>
+          <p class="small" id="appleSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-segoe" id="segoePanel">
+        <div class="meta"><div class="font-name">Segoe UI</div><div class="available" id="segoeAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="segoeBig"></p>
+          <p class="medium" id="segoeMed"></p>
+          <p class="small" id="segoeSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-roboto" id="robotoPanel">
+        <div class="meta"><div class="font-name">Roboto (Google Fonts)</div><div class="available" id="robotoAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="robotoBig"></p>
+          <p class="medium" id="robotoMed"></p>
+          <p class="small" id="robotoSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-inter" id="interPanel">
+        <div class="meta"><div class="font-name">Inter (Apple風)</div><div class="available" id="interAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="interBig"></p>
+          <p class="medium" id="interMed"></p>
+          <p class="small" id="interSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-opensans" id="opensansPanel">
+        <div class="meta"><div class="font-name">Open Sans (Segoe風)</div><div class="available" id="opensansAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="opensansBig"></p>
+          <p class="medium" id="opensansMed"></p>
+          <p class="small" id="opensansSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-sourcesans" id="sourcesansPanel">
+        <div class="meta"><div class="font-name">Source Sans Pro (Segoe風)</div><div class="available" id="sourcesansAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="sourcesansBig"></p>
+          <p class="medium" id="sourcesansMed"></p>
+          <p class="small" id="sourcesansSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-lato" id="latoPanel">
+        <div class="meta"><div class="font-name">Lato (バランス型)</div><div class="available" id="latoAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="latoBig"></p>
+          <p class="medium" id="latoMed"></p>
+          <p class="small" id="latoSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-worksans" id="worksansPanel">
+        <div class="meta"><div class="font-name">Work Sans (Apple風)</div><div class="available" id="worksansAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="worksansBig"></p>
+          <p class="medium" id="worksansMed"></p>
+          <p class="small" id="worksansSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-nunito" id="nunitoPanel">
+        <div class="meta"><div class="font-name">Nunito Sans (Segoe風)</div><div class="available" id="nunitoAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="nunitoBig"></p>
+          <p class="medium" id="nunitoMed"></p>
+          <p class="small" id="nunitoSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-dmsans" id="dmsansPanel">
+        <div class="meta"><div class="font-name">DM Sans (Apple風)</div><div class="available" id="dmsansAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="dmsansBig"></p>
+          <p class="medium" id="dmsansMed"></p>
+          <p class="small" id="dmsansSmall"></p>
+        </div>
+      </div>
+
+      <div class="panel col-poppins" id="poppinsPanel">
+        <div class="meta"><div class="font-name">Poppins (バランス型)</div><div class="available" id="poppinsAvail">検出中…</div></div>
+        <div class="sample">
+          <p class="big" id="poppinsBig"></p>
+          <p class="medium" id="poppinsMed"></p>
+          <p class="small" id="poppinsSmall"></p>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <strong>フォント説明:</strong><br>
+      <strong>システムフォント:</strong> -apple-system (macOS), Segoe UI (Windows), Roboto (Android)<br>
+      <strong>Google Fonts:</strong> Inter (Apple風), Open Sans (Segoe風), Source Sans Pro (Segoe風), Lato (バランス型)<br>
+      <strong>注意:</strong> システムフォントは環境によって利用できない場合があります。Google FontsはCDNから読み込まれます。
+    </footer>
+  </div>
+
+  <script>
+    // DOM refs
+    const textInput = document.getElementById('textInput');
+    const sizeInput = document.getElementById('sizeInput');
+    const weightInput = document.getElementById('weightInput');
+    const transformSelect = document.getElementById('transformSelect');
+    const sizeVal = document.getElementById('sizeVal');
+    const weightVal = document.getElementById('weightVal');
+
+    const appleBig = document.getElementById('appleBig');
+    const appleMed = document.getElementById('appleMed');
+    const appleSmall = document.getElementById('appleSmall');
+    const segoeBig = document.getElementById('segoeBig');
+    const segoeMed = document.getElementById('segoeMed');
+    const segoeSmall = document.getElementById('segoeSmall');
+    const robotoBig = document.getElementById('robotoBig');
+    const robotoMed = document.getElementById('robotoMed');
+    const robotoSmall = document.getElementById('robotoSmall');
+    const interBig = document.getElementById('interBig');
+    const interMed = document.getElementById('interMed');
+    const interSmall = document.getElementById('interSmall');
+    const opensansBig = document.getElementById('opensansBig');
+    const opensansMed = document.getElementById('opensansMed');
+    const opensansSmall = document.getElementById('opensansSmall');
+    const sourcesansBig = document.getElementById('sourcesansBig');
+    const sourcesansMed = document.getElementById('sourcesansMed');
+    const sourcesansSmall = document.getElementById('sourcesansSmall');
+    const latoBig = document.getElementById('latoBig');
+    const latoMed = document.getElementById('latoMed');
+    const latoSmall = document.getElementById('latoSmall');
+    const worksansBig = document.getElementById('worksansBig');
+    const worksansMed = document.getElementById('worksansMed');
+    const worksansSmall = document.getElementById('worksansSmall');
+    const nunitoBig = document.getElementById('nunitoBig');
+    const nunitoMed = document.getElementById('nunitoMed');
+    const nunitoSmall = document.getElementById('nunitoSmall');
+    const dmsansBig = document.getElementById('dmsansBig');
+    const dmsansMed = document.getElementById('dmsansMed');
+    const dmsansSmall = document.getElementById('dmsansSmall');
+    const poppinsBig = document.getElementById('poppinsBig');
+    const poppinsMed = document.getElementById('poppinsMed');
+    const poppinsSmall = document.getElementById('poppinsSmall');
+
+    const appleAvail = document.getElementById('appleAvail');
+    const segoeAvail = document.getElementById('segoeAvail');
+    const robotoAvail = document.getElementById('robotoAvail');
+    const interAvail = document.getElementById('interAvail');
+    const opensansAvail = document.getElementById('opensansAvail');
+    const sourcesansAvail = document.getElementById('sourcesansAvail');
+    const latoAvail = document.getElementById('latoAvail');
+    const worksansAvail = document.getElementById('worksansAvail');
+    const nunitoAvail = document.getElementById('nunitoAvail');
+    const dmsansAvail = document.getElementById('dmsansAvail');
+    const poppinsAvail = document.getElementById('poppinsAvail');
+
+    function updateSamples(){
+      const raw = textInput.value || '';
+      const transform = transformSelect.value;
+      let text = raw;
+      if(transform === 'uppercase') text = raw.toUpperCase();
+      if(transform === 'lowercase') text = raw.toLowerCase();
+
+      const size = sizeInput.value + 'px';
+      const weight = weightInput.value;
+
+      sizeVal.textContent = sizeInput.value;
+      weightVal.textContent = weight;
+
+      [appleBig, segoeBig, robotoBig, interBig, opensansBig, sourcesansBig, latoBig, worksansBig, nunitoBig, dmsansBig, poppinsBig].forEach(el=>{el.style.fontSize = size; el.style.fontWeight = weight});
+      [appleMed, segoeMed, robotoMed, interMed, opensansMed, sourcesansMed, latoMed, worksansMed, nunitoMed, dmsansMed, poppinsMed].forEach(el=>{el.style.fontSize = Math.max(12, Math.round(sizeInput.value/2.5)) + 'px'; el.style.fontWeight = weight});
+      [appleSmall, segoeSmall, robotoSmall, interSmall, opensansSmall, sourcesansSmall, latoSmall, worksansSmall, nunitoSmall, dmsansSmall, poppinsSmall].forEach(el=>{el.style.fontSize = Math.max(11, Math.round(sizeInput.value/6)) + 'px'; el.style.fontWeight = weight});
+
+      appleBig.textContent = text;
+      appleMed.textContent = text;
+      appleSmall.textContent = '例: ' + text;
+      segoeBig.textContent = text;
+      segoeMed.textContent = text;
+      segoeSmall.textContent = '例: ' + text;
+      robotoBig.textContent = text;
+      robotoMed.textContent = text;
+      robotoSmall.textContent = '例: ' + text;
+      interBig.textContent = text;
+      interMed.textContent = text;
+      interSmall.textContent = '例: ' + text;
+      opensansBig.textContent = text;
+      opensansMed.textContent = text;
+      opensansSmall.textContent = '例: ' + text;
+      sourcesansBig.textContent = text;
+      sourcesansMed.textContent = text;
+      sourcesansSmall.textContent = '例: ' + text;
+      latoBig.textContent = text;
+      latoMed.textContent = text;
+      latoSmall.textContent = '例: ' + text;
+      worksansBig.textContent = text;
+      worksansMed.textContent = text;
+      worksansSmall.textContent = '例: ' + text;
+      nunitoBig.textContent = text;
+      nunitoMed.textContent = text;
+      nunitoSmall.textContent = '例: ' + text;
+      dmsansBig.textContent = text;
+      dmsansMed.textContent = text;
+      dmsansSmall.textContent = '例: ' + text;
+      poppinsBig.textContent = text;
+      poppinsMed.textContent = text;
+      poppinsSmall.textContent = '例: ' + text;
+    }
+
+    // フォント利用可否の検出
+    async function detectFonts(){
+      // document.fonts.check を使う
+      try{
+        const appleOk = document.fonts.check('16px "-apple-system"') || document.fonts.check('16px "SF Pro Text"');
+        const segoeOk = document.fonts.check('16px "Segoe UI"');
+        const robotoOk = document.fonts.check('16px "Roboto"');
+        const interOk = document.fonts.check('16px "Inter"');
+        const opensansOk = document.fonts.check('16px "Open Sans"');
+        const sourcesansOk = document.fonts.check('16px "Source Sans Pro"');
+        const latoOk = document.fonts.check('16px "Lato"');
+        const worksansOk = document.fonts.check('16px "Work Sans"');
+        const nunitoOk = document.fonts.check('16px "Nunito Sans"');
+        const dmsansOk = document.fonts.check('16px "DM Sans"');
+        const poppinsOk = document.fonts.check('16px "Poppins"');
+
+        appleAvail.textContent = appleOk ? '利用可能' : '利用不可または代替フォント';
+        segoeAvail.textContent = segoeOk ? '利用可能' : '利用不可または代替フォント';
+        robotoAvail.textContent = robotoOk ? '利用可能' : '読み込み待ち/代替フォント';
+        interAvail.textContent = interOk ? '利用可能' : '読み込み待ち/代替フォント';
+        opensansAvail.textContent = opensansOk ? '利用可能' : '読み込み待ち/代替フォント';
+        sourcesansAvail.textContent = sourcesansOk ? '利用可能' : '読み込み待ち/代替フォント';
+        latoAvail.textContent = latoOk ? '利用可能' : '読み込み待ち/代替フォント';
+        worksansAvail.textContent = worksansOk ? '利用可能' : '読み込み待ち/代替フォント';
+        nunitoAvail.textContent = nunitoOk ? '利用可能' : '読み込み待ち/代替フォント';
+        dmsansAvail.textContent = dmsansOk ? '利用可能' : '読み込み待ち/代替フォント';
+        poppinsAvail.textContent = poppinsOk ? '利用可能' : '読み込み待ち/代替フォント';
+      }catch(e){
+        appleAvail.textContent = '検出できません';
+        segoeAvail.textContent = '検出できません';
+        robotoAvail.textContent = '検出できません';
+        interAvail.textContent = '検出できません';
+        opensansAvail.textContent = '検出できません';
+        sourcesansAvail.textContent = '検出できません';
+        latoAvail.textContent = '検出できません';
+        worksansAvail.textContent = '検出できません';
+        nunitoAvail.textContent = '検出できません';
+        dmsansAvail.textContent = '検出できません';
+        poppinsAvail.textContent = '検出できません';
+      }
+    }
+
+    // 初期更新
+    updateSamples();
+    detectFonts();
+
+    // イベント
+    textInput.addEventListener('input', ()=>{ updateSamples() });
+    sizeInput.addEventListener('input', ()=>{ updateSamples() });
+    weightInput.addEventListener('input', ()=>{ updateSamples() });
+    transformSelect.addEventListener('change', ()=>{ updateSamples() });
+
+    // フォントがロードされたら再検出
+    if('fonts' in document){
+      document.fonts.ready.then(()=>{ detectFonts(); updateSamples(); });
+    }
+  </script>
+</body>
+</html>
