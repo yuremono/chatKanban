@@ -1,7 +1,19 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/db/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'edge';
+
+// Edge Runtimeで動作するSupabaseクライアント
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey);
+}
 
 export async function OPTIONS() {
   return withCors(NextResponse.json({ ok: true }));
@@ -27,41 +39,49 @@ export async function POST(req: Request) {
     let fileName = `${base}${ext}`;
 
     // Supabase Storageにアップロード
-    if (supabase) {
-      // 同名ファイルが存在する場合は連番を付ける
-      let finalFileName = fileName;
-      let i = 1;
-      while (true) {
-        const { data: existing } = await supabase.storage
-          .from('uploads')
-          .list('', { limit: 1, search: finalFileName });
-        
-        if (!existing || existing.length === 0) break;
-        finalFileName = `${base}_${String(i++).padStart(2, '0')}${ext}`;
-      }
-
-      const { data, error } = await supabase.storage
-        .from('uploads')
-        .upload(finalFileName, buf, {
-          contentType: mime,
-          upsert: false
-        });
-
-      if (error) {
-        return withCors(NextResponse.json({ error: error.message }, { status: 500 }));
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(data.path);
-
-      return withCors(NextResponse.json({ url: publicUrl, contentType: mime }));
-    } else {
-      // Supabaseが設定されていない場合はエラー
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      console.error('Supabase not configured');
       return withCors(NextResponse.json({ error: 'Storage not configured' }, { status: 500 }));
     }
+
+    // 同名ファイルが存在する場合は連番を付ける
+    let finalFileName = fileName;
+    let i = 1;
+    while (true) {
+      const { data: existing, error: listError } = await supabase.storage
+        .from('uploads')
+        .list('', { limit: 1, search: finalFileName });
+      
+      if (listError) {
+        console.error('List error:', listError);
+        return withCors(NextResponse.json({ error: `List failed: ${listError.message}` }, { status: 500 }));
+      }
+      
+      if (!existing || existing.length === 0) break;
+      finalFileName = `${base}_${String(i++).padStart(2, '0')}${ext}`;
+    }
+
+    const { data, error } = await supabase.storage
+      .from('uploads')
+      .upload(finalFileName, buf, {
+        contentType: mime,
+        upsert: false
+      });
+
+    if (error) {
+      console.error('Upload error:', error);
+      return withCors(NextResponse.json({ error: `Upload failed: ${error.message}` }, { status: 500 }));
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('uploads')
+      .getPublicUrl(data.path);
+
+    return withCors(NextResponse.json({ url: publicUrl, contentType: mime }));
   } catch (e: any) {
-    return withCors(NextResponse.json({ error: e?.message || 'upload-dataurl failed' }, { status: 500 }));
+    console.error('Unexpected error:', e);
+    return withCors(NextResponse.json({ error: e?.message || 'upload-dataurl failed', stack: e?.stack }, { status: 500 }));
   }
 }
 
