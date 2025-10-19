@@ -20,8 +20,22 @@ export default function Page() {
       if (Array.isArray(payload?.data) && payload.data.length > 0) {
         setTopics(payload.data.map((d: any) => d.topic));
       } else {
+        // /api/topicsも試す
         const t = await fetch('/api/topics', { cache: 'no-store' }).then(r => r.json());
-        setTopics(t.topics ?? []);
+        if (Array.isArray(t.topics) && t.topics.length > 0) {
+          setTopics(t.topics);
+        } else {
+          // 両方空の場合、defaultExport.jsonを読み込む
+          try {
+            const defaultRes = await fetch('/defaultExport.json');
+            const defaultPayload = await defaultRes.json();
+            if (Array.isArray(defaultPayload?.data) && defaultPayload.data.length > 0) {
+              setTopics(defaultPayload.data.map((d: any) => d.topic));
+            }
+          } catch (defaultErr) {
+            console.warn('Failed to load default export:', defaultErr);
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to fetch topics:', err);

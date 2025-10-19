@@ -66,28 +66,41 @@
       model = 'ChatGPT';
       // ChatGPTのユーザー名を取得（複数の方法で試行）
       const selectors = [
+        'button[id$="-button"]',  // ヘッダーのユーザーボタン
         '[data-testid="profile-button"]',
-        'button[aria-label*="ユーザー"]',
-        'button[aria-label*="User"]',
-        'nav button img[alt]',
-        '.flex.items-center.gap-2 > div',
+        'button img[alt]',
+        'nav button',
+        'header button',
       ];
       
       for (const sel of selectors) {
-        const el = document.querySelector(sel);
-        if (el) {
-          let text = '';
-          if (el.tagName === 'IMG') {
-            text = el.getAttribute('alt') || '';
-          } else {
-            text = (el.textContent || '').trim();
+        const buttons = document.querySelectorAll(sel);
+        for (const el of buttons) {
+          // ボタン内のdivやspanからテキストを探す
+          const divs = el.querySelectorAll('div, span');
+          for (const div of divs) {
+            const text = (div.textContent || '').trim();
+            if (text && text.length > 0 && text.length < 50 && 
+                !text.includes('@') && 
+                text !== 'User' && text !== 'ユーザー' &&
+                !/^(https?|www\.|\.com)/.test(text)) {
+              userName = text;
+              break;
+            }
           }
-          if (text && text.length > 0 && text !== 'User' && text !== 'ユーザー') {
-            // メールアドレスを除外
-            userName = text.split(/[@\s(（]/)[0].trim() || text;
-            if (userName !== 'Unknown User') break;
+          if (userName !== 'Unknown User') break;
+          
+          // imgのaltも試す
+          const img = el.querySelector('img[alt]');
+          if (img) {
+            const alt = img.getAttribute('alt') || '';
+            if (alt && alt.length > 0 && alt.length < 50 && !alt.includes('@')) {
+              userName = alt;
+              break;
+            }
           }
         }
+        if (userName !== 'Unknown User') break;
       }
 
       // ChatGPTのチャットタイトルを取得
@@ -217,10 +230,19 @@
       const totalImages = (data.messages || []).reduce((sum, m) => sum + ((m.metadata?.imageUrls || []).length), 0);
       const topicIdForName = `topic_${data.threadId}`;
       
-      // 既に送信済みかチェック
+      // 現在の送信先環境を取得
+      const settings = await new Promise(resolve => {
+        chrome.storage.sync.get(['chatKanbanApiTarget'], result => {
+          resolve(result);
+        });
+      });
+      const currentTarget = settings.chatKanbanApiTarget || 'vercel';
+      const storageKey = currentTarget === 'vercel' ? 'sentTopicsVercel' : 'sentTopicsLocalhost';
+      
+      // 既に送信済みかチェック（環境ごとに別管理）
       const sentTopics = await new Promise(resolve => {
-        chrome.storage.local.get(['sentTopics'], result => {
-          resolve(result.sentTopics || {});
+        chrome.storage.local.get([storageKey], result => {
+          resolve(result[storageKey] || {});
         });
       });
       
@@ -238,25 +260,29 @@
             return;
           }
         } else {
-          alert('このトピックは既に送信済みです。\n新しいメッセージがないため、送信をスキップします。');
-          return;
+          if (!confirm(`このトピックは既に送信済みです (${currentTarget})。\n\n再送信しますか？`)) {
+            return;
+          }
         }
       }
       
       const resp = await chrome.runtime.sendMessage({ type:'CK_IMPORT', data, topicIdForName });
       
       if (resp?.ok) {
-        // 送信成功したら記録
+        // 送信成功したら記録（環境ごとに別管理）
         sentTopics[topicIdForName] = {
           messageCount: (data.messages || []).length,
           sentAt: new Date().toISOString(),
           title: data.title || data.chatTitle
         };
-        chrome.storage.local.set({ sentTopics });
+        const updateObj = {};
+        updateObj[storageKey] = sentTopics;
+        chrome.storage.local.set(updateObj);
         
+        const targetLabel = currentTarget === 'vercel' ? 'Vercel' : 'Localhost';
         const msg = isUpdate 
-          ? `トピックを更新しました！\n${resp.result?.topicId || ''}\n画像: ${totalImages}枚`
-          : `送信完了！\n${resp.result?.topicId || ''}\n画像: ${totalImages}枚`;
+          ? `トピックを更新しました！(${targetLabel})\n${resp.result?.topicId || ''}\n画像: ${totalImages}枚`
+          : `送信完了！(${targetLabel})\n${resp.result?.topicId || ''}\n画像: ${totalImages}枚`;
         alert(msg);
       } else {
         alert(`Send failed: ${resp?.error || resp?.status || 'unknown'}`);

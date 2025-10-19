@@ -4,41 +4,112 @@
     <meta charset="utf-8" />
     <title>Chat Kanban Options</title>
     <style>
-      body { font-family: -apple-system, system-ui; padding: 16px; }
-      label { display: block; margin-top: 12px; }
-      input { width: 100%; padding: 8px; margin-top: 4px; }
-      button { margin-top: 12px; padding: 8px 12px; }
+      body { font-family: -apple-system, system-ui; padding: 16px; max-width: 600px; }
+      h1 { margin-bottom: 24px; }
+      .url-group { 
+        border: 1px solid #ddd; 
+        padding: 16px; 
+        margin-bottom: 12px; 
+        border-radius: 8px;
+        background: #f9f9f9;
+      }
+      .url-group.active {
+        border-color: #0066ff;
+        background: #f0f7ff;
+      }
+      label { display: block; margin-top: 8px; font-weight: 500; }
+      input[type="text"] { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ccc; border-radius: 4px; }
+      input[type="radio"] { margin-right: 8px; }
+      button { margin-top: 16px; padding: 10px 20px; background: #0066ff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+      button:hover { background: #0052cc; }
+      .radio-label { display: flex; align-items: center; font-size: 14px; margin-bottom: 8px; cursor: pointer; }
+      .token-label { font-size: 13px; color: #666; }
     </style>
   </head>
   <body>
     <h1>Chat Kanban 設定</h1>
-    <label>
-      API Base URL
-      <input id="apiBase" placeholder="http://localhost:3000" />
+    
+    <div class="url-group" id="group-vercel">
+      <div class="radio-label">
+        <input type="radio" name="apiTarget" id="radio-vercel" value="vercel" />
+        <label for="radio-vercel" style="margin: 0; font-weight: 600;">Vercel (本番環境)</label>
+      </div>
+      <label>
+        API Base URL
+        <input type="text" id="apiBaseVercel" placeholder="https://chat-kanban.vercel.app" />
+      </label>
+    </div>
+
+    <div class="url-group" id="group-localhost">
+      <div class="radio-label">
+        <input type="radio" name="apiTarget" id="radio-localhost" value="localhost" />
+        <label for="radio-localhost" style="margin: 0; font-weight: 600;">Localhost (開発環境)</label>
+      </div>
+      <label>
+        API Base URL
+        <input type="text" id="apiBaseLocalhost" placeholder="http://localhost:3000" />
+      </label>
+    </div>
+
+    <label class="token-label">
+      Token (任意・将来的に使用予定)
+      <input type="text" id="token" placeholder="" />
     </label>
-    <label>
-      Token (任意)
-      <input id="token" placeholder="" />
-    </label>
+
     <button id="save">保存</button>
+
     <script>
-      const apiBase = document.getElementById('apiBase');
+      const radioVercel = document.getElementById('radio-vercel');
+      const radioLocalhost = document.getElementById('radio-localhost');
+      const apiBaseVercel = document.getElementById('apiBaseVercel');
+      const apiBaseLocalhost = document.getElementById('apiBaseLocalhost');
       const token = document.getElementById('token');
       const save = document.getElementById('save');
+      const groupVercel = document.getElementById('group-vercel');
+      const groupLocalhost = document.getElementById('group-localhost');
 
-      chrome.storage.sync.get(['chatKanbanApiBase', 'chatKanbanToken'], (res) => {
-        apiBase.value = res.chatKanbanApiBase || 'http://localhost:3000';
+      // ラジオボタンのハイライト
+      function updateActiveGroup() {
+        groupVercel.classList.toggle('active', radioVercel.checked);
+        groupLocalhost.classList.toggle('active', radioLocalhost.checked);
+      }
+
+      radioVercel.addEventListener('change', updateActiveGroup);
+      radioLocalhost.addEventListener('change', updateActiveGroup);
+
+      // 設定を読み込み
+      chrome.storage.sync.get([
+        'chatKanbanApiTarget',
+        'chatKanbanApiBaseVercel',
+        'chatKanbanApiBaseLocalhost',
+        'chatKanbanToken'
+      ], (res) => {
+        const target = res.chatKanbanApiTarget || 'vercel';
+        if (target === 'vercel') {
+          radioVercel.checked = true;
+        } else {
+          radioLocalhost.checked = true;
+        }
+        apiBaseVercel.value = res.chatKanbanApiBaseVercel || 'https://chat-kanban.vercel.app';
+        apiBaseLocalhost.value = res.chatKanbanApiBaseLocalhost || 'http://localhost:3000';
         token.value = res.chatKanbanToken || '';
+        updateActiveGroup();
       });
 
+      // 保存
       save.addEventListener('click', () => {
+        const target = radioVercel.checked ? 'vercel' : 'localhost';
         chrome.storage.sync.set({
-          chatKanbanApiBase: apiBase.value,
+          chatKanbanApiTarget: target,
+          chatKanbanApiBaseVercel: apiBaseVercel.value,
+          chatKanbanApiBaseLocalhost: apiBaseLocalhost.value,
           chatKanbanToken: token.value,
-        }, () => alert('保存しました'));
+        }, () => {
+          alert(`保存しました\n使用中: ${target === 'vercel' ? 'Vercel (本番)' : 'Localhost (開発)'}`);
+        });
       });
     </script>
   </body>
-  </html>
+</html>
 
 
