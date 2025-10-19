@@ -10,17 +10,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       const { apiBase, token } = await getSettings();
 
       // 各メッセージに既に imageUrls が埋め込まれているのでそのまま送信
+      console.log('[CK_IMPORT] API Base:', apiBase);
       console.log('[CK_IMPORT] Sending data with embedded images:', data);
       const idempotencyKey = `${data.threadId}-${Date.now()}`;
-      const res = await fetch(`${apiBase}/api/import`, {
+      const url = `${apiBase}/api/import`;
+      console.log('[CK_IMPORT] Fetching:', url);
+      
+      const res = await fetch(url, {
         method:'POST',
         headers:{ 'content-type':'application/json', 'authorization': token?`Bearer ${token}`:'', 'Idempotency-Key': idempotencyKey },
         body: JSON.stringify(data)
       });
-      const json = await res.json().catch(()=>({}));
+      
+      console.log('[CK_IMPORT] Response status:', res.status, res.statusText);
+      const json = await res.json().catch((e) => { 
+        console.error('[CK_IMPORT] JSON parse error:', e); 
+        return {}; 
+      });
       console.log('[CK_IMPORT] Import result:', json);
       sendResponse({ ok: res.ok, result: json, status: res.status });
-    } catch(e){ console.error('[CK_IMPORT] Error:', e); sendResponse({ ok:false, error: e?.message||String(e) }); }
+    } catch(e){ 
+      console.error('[CK_IMPORT] Error:', e); 
+      console.error('[CK_IMPORT] Error stack:', e?.stack);
+      sendResponse({ ok:false, error: e?.message||String(e) }); 
+    }
   })();
   return true;
 });
