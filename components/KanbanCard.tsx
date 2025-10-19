@@ -23,67 +23,42 @@ function sanitizeUrl(src: string): { primary: string; fallback: string } {
   }
 }
 
-function ImageDisplay({ src }: { src: string }) {
-  const [imageError, setImageError] = useState(false);
+function ImageLinkRow({ src }: { src: string }) {
   const [copied, setCopied] = useState(false);
   const { primary, fallback } = sanitizeUrl(src);
 
   return (
-    <div className="mt-2 space-y-2">
-      {!imageError ? (
-        <img
-          src={primary}
-          alt="Attached image"
-          className="max-w-full h-auto rounded-lg border"
-          style={{ maxHeight: '400px', objectFit: 'contain' }}
-          onError={(e) => {
-            console.error('Image load error:', primary);
-            // フォールバックURLを試す
-            if ((e.target as HTMLImageElement).src === primary && primary !== fallback) {
-              (e.target as HTMLImageElement).src = fallback;
-            } else {
-              setImageError(true);
-            }
-          }}
-          loading="lazy"
-        />
-      ) : (
-        <div className="p-4 border rounded-lg bg-gray-50 text-sm text-gray-600">
-          画像の読み込みに失敗しました
-        </div>
-      )}
-      <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={(e) => {
-            e.preventDefault();
-            try {
-              const w = window.open(primary, '_blank', 'noopener');
-              if (!w || w.closed) window.open(fallback, '_blank', 'noopener');
-            } catch {
-              window.open(fallback, '_blank', 'noopener');
-            }
-          }}
-          className="flex items-center gap-1 text-xs"
-        >
-          Open Image <ExternalLink className="w-3 h-3" />
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(primary);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            } catch {}
-          }}
-          className="flex items-center gap-1"
-        >
-          {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-        </Button>
-      </div>
+    <div className="flex items-center gap-2 mt-2">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={(e) => {
+          e.preventDefault();
+          try {
+            const w = window.open(primary, '_blank', 'noopener');
+            if (!w || w.closed) window.open(fallback, '_blank', 'noopener');
+          } catch {
+            window.open(fallback, '_blank', 'noopener');
+          }
+        }}
+        className="flex items-center gap-1 text-xs"
+      >
+        Open Image <ExternalLink className="w-3 h-3" />
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(primary);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          } catch {}
+        }}
+        className="flex items-center gap-1"
+      >
+        {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+      </Button>
     </div>
   );
 }
@@ -211,7 +186,7 @@ export function KanbanCard({ topic }: KanbanCardProps) {
                               m.metadata.imageDataUrls.length > 0 && (
                                 <div className="flex flex-col gap-2 mt-2">
                                   {m.metadata.imageDataUrls.map((src: string, i: number) => (
-                                    <ImageDisplay key={i} src={src} />
+                                    <ImageLinkRow key={i} src={src} />
                                   ))}
                                 </div>
                               )}
@@ -220,7 +195,7 @@ export function KanbanCard({ topic }: KanbanCardProps) {
                               (m.metadata.resolvedImageUrls as any[]).length > 0 && (
                                 <div className="flex flex-col gap-2 mt-2">
                                   {m.metadata.resolvedImageUrls.map((src: string, i: number) => (
-                                    <ImageDisplay key={i} src={src} />
+                                    <ImageLinkRow key={i} src={src} />
                                   ))}
                                 </div>
                               )}
@@ -232,7 +207,7 @@ export function KanbanCard({ topic }: KanbanCardProps) {
                                   {m.metadata.imageUrls
                                     .filter((src: string) => typeof src === 'string')
                                     .map((src: string, i: number) => (
-                                      <ImageDisplay key={i} src={src} />
+                                      <ImageLinkRow key={i} src={src} />
                                     ))}
                                 </div>
                               )}
