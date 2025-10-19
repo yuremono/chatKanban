@@ -86,8 +86,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 async function getSettings(): Promise<{ apiBase: string; token: string | null }> {
-  const apiBase = await new Promise<string>((resolve) => chrome.storage.sync.get(['chatKanbanApiBase'], (r) => resolve(r.chatKanbanApiBase || 'http://localhost:3000')));
-  const token = await new Promise<string | null>((resolve) => chrome.storage.sync.get(['chatKanbanToken'], (r) => resolve(r.chatKanbanToken || null)));
+  const settings = await new Promise<any>((resolve) => {
+    chrome.storage.sync.get([
+      'chatKanbanApiTarget',
+      'chatKanbanApiBaseVercel',
+      'chatKanbanApiBaseLocalhost',
+      'chatKanbanToken'
+    ], (r) => resolve(r));
+  });
+  
+  console.log('[ServiceWorker] Raw settings:', settings);
+  
+  const target = settings.chatKanbanApiTarget || 'vercel';
+  let apiBase: string;
+  
+  if (target === 'vercel') {
+    apiBase = settings.chatKanbanApiBaseVercel || 'https://chat-kanban.vercel.app';
+  } else {
+    apiBase = settings.chatKanbanApiBaseLocalhost || 'http://localhost:3000';
+  }
+  
+  const token = settings.chatKanbanToken || null;
+  
+  console.log('[ServiceWorker] Resolved target:', target, 'apiBase:', apiBase);
+  
   return { apiBase, token };
 }
 
