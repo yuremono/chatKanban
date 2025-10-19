@@ -32,7 +32,7 @@
   async function onClickSend() {
     try {
       const data = extractThread();
-      const totalImages = (data.messages || []).reduce((sum, m) => sum + ((m.metadata?.imageUrls || []).length), 0);
+      const totalImages = (data.messages || []).reduce((sum, m) => sum + (((m as any).metadata?.imageUrls || []).length), 0);
       const topicIdForName = `topic_${data.threadId}`;
       const resp = await chrome.runtime.sendMessage({ type: 'CK_IMPORT', data, topicIdForName });
       if (resp?.ok) alert(`Imported: ${resp.result?.topicId || ''}\n画像: ${totalImages}枚`);

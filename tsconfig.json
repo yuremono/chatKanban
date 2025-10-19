@@ -51,6 +51,8 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "packages/extension/**/*.ts",
+    "packages/extension_backup/**/*.ts"
   ]
 }

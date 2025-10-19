@@ -56,6 +56,10 @@ export async function POST(req: Request) {
       rallyIds.push(currentRallyId);
       await Repositories.createRally({ id: currentRallyId, topicId, index: rallyIndex - 1 });
     }
+    
+    // currentRallyId は必ず定義されている
+    if (!currentRallyId) continue;
+    
     await Repositories.createMessage({
       id: `${currentRallyId}_${Math.random().toString(36).slice(2)}`,
       rallyId: currentRallyId,
