@@ -46,6 +46,8 @@ async function getSettings(){
     'chatKanbanToken'
   ], v => r(v)));
   
+  console.log('[ServiceWorker] Raw settings:', settings);
+  
   const target = settings.chatKanbanApiTarget || 'vercel';
   let apiBase;
   if (target === 'vercel') {
@@ -55,5 +57,8 @@ async function getSettings(){
   }
   
   const token = settings.chatKanbanToken || null;
+  
+  console.log('[ServiceWorker] Resolved target:', target, 'apiBase:', apiBase);
+  
   return { apiBase, token };
 }

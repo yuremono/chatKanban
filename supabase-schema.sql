@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS chatkanban_topics (
   visibility TEXT NOT NULL CHECK (visibility IN ('public', 'private', 'unlisted')),
   "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  "deletedAt" TIMESTAMPTZ,
   "userName" TEXT,
   "chatTitle" TEXT,
   model TEXT
