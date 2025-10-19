@@ -59,3 +59,11 @@ public/uploads/
 
 # Backup files
 *.backup.*
+
+# Large files
+*.fbx
+*.glb
+*.zip
+index*.html
+font_comparison.html
+chat-kanban-export*.json
