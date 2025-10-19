@@ -1,9 +1,11 @@
 // 将来: Supabase/PostgreSQL実装へ差し替え。
 // MVPではインメモリ＋ローカルJSON永続化（開発用）。
+// Vercel環境ではVercel KV (Redis)を使用。
 
 import type { Topic, Rally, Message } from '@/packages/shared/Types';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { VercelKVStore } from './VercelKVStore';
 
 const topics = new Map<string, Topic>();
 const rallies = new Map<string, Rally>();
@@ -13,26 +15,78 @@ const idempotencyMap = new Map<string, { topicId: string; rallyIds: string[] }>(
 const DATA_DIR = path.join(process.cwd(), '.data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
+// Vercel環境かどうかを判定
+const isVercel = process.env.VERCEL === '1';
+
 type DbShape = {
   topics: Topic[];
   rallies: Rally[];
   messages: Message[];
 };
 
+let isLoaded = false;
+
 async function ensureLoaded() {
+  if (isLoaded) return;
+  
+  if (isVercel) {
+    // VercelではVercel KV (Redis)から読み込み
+    try {
+      const [topicsArray, ralliesArray, messagesArray] = await Promise.all([
+        VercelKVStore.getAllTopics(),
+        VercelKVStore.getAllRallies(),
+        VercelKVStore.getAllMessages(),
+      ]);
+      topics.clear(); rallies.clear(); messages.clear();
+      for (const t of topicsArray) topics.set(t.id, t);
+      for (const r of ralliesArray) rallies.set(r.id, r);
+      for (const m of messagesArray) messages.set(m.id, m);
+      isLoaded = true;
+      console.log(`[KV] Loaded ${topicsArray.length} topics, ${ralliesArray.length} rallies, ${messagesArray.length} messages`);
+    } catch (e) {
+      console.error('[KV] Failed to load from Vercel KV:', e);
+      isLoaded = true;
+    }
+    return;
+  }
+  
+  // ローカル環境ではファイルシステムから読み込み
   try {
     await fs.mkdir(DATA_DIR, { recursive: true });
     const buf = await fs.readFile(DB_FILE, 'utf8').catch(() => '');
-    if (!buf) return;
+    if (!buf) {
+      isLoaded = true;
+      return;
+    }
     const json: DbShape = JSON.parse(buf);
     topics.clear(); rallies.clear(); messages.clear();
     for (const t of json.topics || []) topics.set(t.id, t);
     for (const r of json.rallies || []) rallies.set(r.id, r);
     for (const m of json.messages || []) messages.set(m.id, m);
-  } catch {}
+    isLoaded = true;
+  } catch (e) {
+    console.error('[File] Failed to load db.json:', e);
+    isLoaded = true;
+  }
 }
 
 async function persist() {
+  if (isVercel) {
+    // VercelではVercel KV (Redis)に保存
+    try {
+      await Promise.all([
+        VercelKVStore.saveAllTopics(Array.from(topics.values())),
+        VercelKVStore.saveAllRallies(Array.from(rallies.values())),
+        VercelKVStore.saveAllMessages(Array.from(messages.values())),
+      ]);
+      console.log(`[KV] Persisted ${topics.size} topics, ${rallies.size} rallies, ${messages.size} messages`);
+    } catch (e) {
+      console.error('[KV] Failed to persist to Vercel KV:', e);
+    }
+    return;
+  }
+  
+  // ローカル環境ではファイルシステムに保存
   try {
     const json: DbShape = {
       topics: Array.from(topics.values()),
@@ -41,7 +95,9 @@ async function persist() {
     };
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(DB_FILE, JSON.stringify(json));
-  } catch {}
+  } catch (e) {
+    console.error('[File] Failed to persist db.json:', e);
+  }
 }
 
 export const Repositories = {
