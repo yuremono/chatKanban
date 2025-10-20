@@ -28,6 +28,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                             console.warn('[CK_IMPORT] Failed to fetch dataUrl for:', src);
                             continue;
                         }
+                        
+                        // DataURLサイズチェック（約4MB以下に制限）
+                        const sizeInBytes = Math.ceil(dataUrl.length * 0.75); // Base64は約33%増加するので逆算
+                        const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2);
+                        console.log('[CK_IMPORT] Image size:', sizeInMB, 'MB');
+                        
+                        if (sizeInBytes > 4 * 1024 * 1024) {
+                            console.warn('[CK_IMPORT] Image too large (', sizeInMB, 'MB), skipping:', src);
+                            continue;
+                        }
+                        
                         console.log('[CK_IMPORT] Uploading to:', `${apiBase}/api/upload-dataurl`);
                         const r = await fetch(`${apiBase}/api/upload-dataurl`, {
                             method: 'POST', headers: { 'content-type': 'application/json' },
