@@ -199,7 +199,7 @@ export default function Page() {
       onModeChange={setSidebarMode}
       hideSidebar={viewMode === 'preview' && sidebarMode === 'center'}
       sidebarContent={
-        <div className="sidebar-compact">
+        <div className="sidebar_compact">
           {/* タイトル */}
           <div style={{ 
             textAlign: 'center', 
@@ -215,7 +215,7 @@ export default function Page() {
           {/* ダークモードトグル */}
           <button
             onClick={toggleDarkMode}
-            className="icon-button"
+            className="icon_button"
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
@@ -224,7 +224,7 @@ export default function Page() {
           <button
             onClick={fetchTopics}
             disabled={loading}
-            className="icon-button"
+            className="icon_button"
             style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
@@ -233,7 +233,7 @@ export default function Page() {
           {/* JSONエクスポートボタン */}
           <button
             onClick={exportJSON}
-            className="icon-button"
+            className="icon_button"
           >
             <Download className="w-5 h-5" />
           </button>
@@ -244,7 +244,7 @@ export default function Page() {
           {/* 検索ボタン */}
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="icon-button"
+            className="icon_button"
           >
             <i className="las la-search" style={{ fontSize: '1.5rem' }} />
           </button>
@@ -252,7 +252,7 @@ export default function Page() {
           {/* AIチャットボタン */}
           <button
             onClick={() => setIsAiChatOpen(true)}
-            className="icon-button"
+            className="icon_button"
           >
             <MessageCircleMore className="w-5 h-5" />
           </button>
@@ -273,7 +273,7 @@ export default function Page() {
           </section>
         ) : viewMode === 'default' ? (
           // デフォルトモード：2カラム固定
-          <div className="two-column-grid">
+          <div className="two_column_grid">
             {/* 左カラム */}
             <div className="column">
               {leftColumn.map((topic) => (
@@ -290,7 +290,7 @@ export default function Page() {
           </div>
         ) : sidebarMode === 'center' ? (
           // センターモード：プレビュー（3ペイン）
-          <div className="preview-layout">
+          <div className="preview_layout">
             <PanelGroup 
               direction="horizontal" 
               style={{ height: '100vh' }}
@@ -298,31 +298,9 @@ export default function Page() {
             >
               {/* 左エリア（一覧） */}
               <Panel defaultSize={previewPanelSizes[0]} minSize={20}>
-                <div style={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column'
-                }}>
-                  <h3 style={{ 
-                    color: 'var(--tx)', 
-                    padding: 'var(--inline)',
-                    margin: 0,
-                    fontSize: '0.875rem',
-                    opacity: 0.7,
-                    borderBottom: 'var(--line)'
-                  }}>
-                    他のトピック
-                  </h3>
-                  <div style={{ 
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: 'var(--inline)'
-                  }}>
-                    <div style={{ 
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 'var(--gap)'
-                    }}>
+                <div className="preview_panel_container">
+                  <div className="preview_list_scroll">
+                    <div className="preview_list_inner">
                       {listTopics.map((topic) => (
                         <KanbanCard 
                           key={topic.id} 
@@ -337,21 +315,10 @@ export default function Page() {
 
               {/* リサイザー（サイドバー幅） */}
               <PanelResizeHandle>
-                <div style={{
-                  width: 'var(--navW)',
-                  height: '100%',
-                  padding: 'var(--inline)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 'var(--gap)',
-                  cursor: 'col-resize'
-                }}>
-                  <div 
-                    className="nav_window"
-                    style={{ cursor: 'col-resize' }}
-                  >
+                <div className="resizer_sidebar_container">
+                  <div className="nav_window resizer_nav_window">
                     <div className="nav_content flex flex-col gap-4 h-full">
-                      <div className="sidebar-compact">
+                      <div className="sidebar_compact">
                         {/* タイトル */}
                         <div style={{ 
                           textAlign: 'center', 
@@ -367,7 +334,7 @@ export default function Page() {
                         {/* ダークモードトグル */}
                         <button
                           onClick={toggleDarkMode}
-                          className="icon-button"
+                          className="icon_button"
                         >
                           {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                         </button>
@@ -376,7 +343,7 @@ export default function Page() {
                         <button
                           onClick={fetchTopics}
                           disabled={loading}
-                          className="icon-button"
+                          className="icon_button"
                           style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
                         >
                           <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
@@ -385,7 +352,7 @@ export default function Page() {
                         {/* JSONエクスポートボタン */}
                         <button
                           onClick={exportJSON}
-                          className="icon-button"
+                          className="icon_button"
                         >
                           <Download className="w-5 h-5" />
                         </button>
@@ -396,7 +363,7 @@ export default function Page() {
                         {/* 検索ボタン */}
                         <button
                           onClick={() => setIsSearchOpen(true)}
-                          className="icon-button"
+                          className="icon_button"
                         >
                           <i className="las la-search" style={{ fontSize: '1.5rem' }} />
                         </button>
@@ -404,7 +371,7 @@ export default function Page() {
                         {/* AIチャットボタン */}
                         <button
                           onClick={() => setIsAiChatOpen(true)}
-                          className="icon-button"
+                          className="icon_button"
                         >
                           <MessageCircleMore className="w-5 h-5" />
                         </button>
@@ -416,45 +383,17 @@ export default function Page() {
 
               {/* 右エリア（プレビュー） */}
               <Panel defaultSize={previewPanelSizes[1]} minSize={40}>
-                <div style={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column'
-                }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    padding: 'var(--inline)',
-                    borderBottom: 'var(--line)'
-                  }}>
-                    <h2 style={{ color: 'var(--tx)', fontSize: '1.25rem', margin: 0 }}>
-                      {previewTopic ? (previewTopic.chatTitle || previewTopic.title) : 'プレビュー'}
-                    </h2>
-                    <button
-                      onClick={closePreview}
-                      style={{
-                        background: 'none',
-                        border: '1px solid var(--borderColor)',
-                        borderRadius: 'var(--rad)',
-                        padding: '0.5rem 1rem',
-                        cursor: 'pointer',
-                        color: 'var(--tx)',
-                        fontSize: '0.875rem'
-                      }}
-                    >
+                <div className="preview_panel_container">
+                  <div className="preview_header">
+                    <button onClick={closePreview} className="preview_close_button">
                       ✕ 閉じる
                     </button>
                   </div>
-                  <div style={{ 
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: 'var(--inline)'
-                  }}>
+                  <div className="preview_content_scroll">
                     {previewTopic ? (
                       <KanbanCard topic={previewTopic} />
                     ) : (
-                      <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--tx)' }}>
+                      <div className="preview_empty">
                         トピックが見つかりません
                       </div>
                     )}
@@ -465,7 +404,7 @@ export default function Page() {
           </div>
         ) : (
           // 左/右モード：プレビュー（2ペイン）
-          <div className="preview-layout">
+          <div className="preview_layout">
             <PanelGroup 
               direction="horizontal" 
               style={{ height: '100vh' }}
@@ -473,32 +412,9 @@ export default function Page() {
             >
               {/* 一覧ペイン */}
               <Panel defaultSize={previewPanelSizes[0]} minSize={20}>
-                <div style={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  borderRight: 'var(--line)'
-                }}>
-                  <h3 style={{ 
-                    color: 'var(--tx)', 
-                    padding: 'var(--inline)',
-                    margin: 0,
-                    fontSize: '0.875rem',
-                    opacity: 0.7,
-                    borderBottom: 'var(--line)'
-                  }}>
-                    他のトピック
-                  </h3>
-                  <div style={{ 
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: 'var(--inline)'
-                  }}>
-                    <div style={{ 
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 'var(--gap)'
-                    }}>
+                <div className="preview_panel_container" style={{ borderRight: 'var(--line)' }}>
+                  <div className="preview_list_scroll">
+                    <div className="preview_list_inner">
                       {listTopics.map((topic) => (
                         <KanbanCard 
                           key={topic.id} 
@@ -520,45 +436,17 @@ export default function Page() {
 
               {/* プレビューペイン */}
               <Panel defaultSize={previewPanelSizes[1]} minSize={40}>
-                <div style={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column'
-                }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    padding: 'var(--inline)',
-                    borderBottom: 'var(--line)'
-                  }}>
-                    <h2 style={{ color: 'var(--tx)', fontSize: '1.25rem', margin: 0 }}>
-                      {previewTopic ? (previewTopic.chatTitle || previewTopic.title) : 'プレビュー'}
-                    </h2>
-                    <button
-                      onClick={closePreview}
-                      style={{
-                        background: 'none',
-                        border: '1px solid var(--borderColor)',
-                        borderRadius: 'var(--rad)',
-                        padding: '0.5rem 1rem',
-                        cursor: 'pointer',
-                        color: 'var(--tx)',
-                        fontSize: '0.875rem'
-                      }}
-                    >
+                <div className="preview_panel_container">
+                  <div className="preview_header">
+                    <button onClick={closePreview} className="preview_close_button">
                       ✕ 閉じる
                     </button>
                   </div>
-                  <div style={{ 
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: 'var(--inline)'
-                  }}>
+                  <div className="preview_content_scroll">
                     {previewTopic ? (
                       <KanbanCard topic={previewTopic} />
                     ) : (
-                      <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--tx)' }}>
+                      <div className="preview_empty">
                         トピックが見つかりません
                       </div>
                     )}
@@ -573,14 +461,14 @@ export default function Page() {
       {/* 検索モーダル */}
       {isSearchOpen && (
         <div 
-          className="modal-overlay"
+          className="modal_overlay"
           onClick={() => setIsSearchOpen(false)}
         >
           <div 
-            className="modal-content"
+            className="modal_content"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="modal-header">検索</h2>
+            <h2 className="modal_header">検索</h2>
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
               <input
                 type="text"
@@ -655,15 +543,15 @@ export default function Page() {
       {/* AIチャットモーダル */}
       {isAiChatOpen && (
         <div 
-          className="modal-overlay"
+          className="modal_overlay"
           onClick={() => setIsAiChatOpen(false)}
         >
           <div 
-            className="modal-content"
+            className="modal_content"
             style={{ display: 'flex', flexDirection: 'column' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="modal-header">AIアシスタント</h2>
+            <h2 className="modal_header">AIアシスタント</h2>
             
             <div style={{
               flex: 1,

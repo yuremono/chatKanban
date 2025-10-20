@@ -115,7 +115,7 @@
     }
     
     /* コンパクトサイドバーモード */
-    .draggable-layout.compact-sidebar {
+    .draggable-layout.compact_sidebar {
       --navW: 120px;
     }
   }
@@ -126,7 +126,7 @@
     }
     
     /* コンパクトサイドバーモード */
-    .draggable-layout.compact-sidebar {
+    .draggable-layout.compact_sidebar {
       --navW: 70px;
     }
   }
@@ -347,7 +347,7 @@
   }
 
   /* コンパクトサイドバー用スタイル */
-  .sidebar-compact {
+  .sidebar_compact {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -355,7 +355,7 @@
     padding: 1rem 0;
   }
 
-  .sidebar-compact .icon-button {
+  .sidebar_compact .icon_button {
     background: none;
     border: none;
     cursor: pointer;
@@ -365,11 +365,11 @@
     transition: background-color 0.2s;
   }
 
-  .sidebar-compact .icon-button:hover {
+  .sidebar_compact .icon_button:hover {
     background-color: var(--bc);
   }
 
-  .sidebar-compact .divider {
+  .sidebar_compact .divider {
     width: 80%;
     height: 1px;
     background-color: var(--borderColor);
@@ -377,13 +377,14 @@
   }
 
   /* 2カラムグリッド */
-  .two-column-grid {
+  .two_column_grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--gap);
-}
-.two-column-grid:is(.center *){
-          gap: calc( var(--navW) + var(--inline)*2 );
+  }
+  
+  .two_column_grid:is(.center *){
+    gap: calc( var(--navW) + var(--inline)*2 );
   }
 
   .column {
@@ -393,39 +394,77 @@
   }
 
   /* プレビューモード */
-  .preview-layout {
+  .preview_layout {
     display: flex;
     height: 100vh;
     overflow: hidden;
   }
 
-  .topic-list-pane {
-    border-right: var(--line);
-    overflow-y: auto;
-    padding: var(--inline);
+  .preview_panel_container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
-  .topic-list-item {
-    padding: 0.75rem;
+  .preview_list_scroll {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .preview_list_inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
+  .preview_header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .preview_close_button {
+    background: none;
+    border: 1px solid var(--borderColor);
     border-radius: var(--rad);
+    padding: 0.5rem 1rem;
     cursor: pointer;
+    color: var(--tx);
+    font-size: 0.875rem;
+  }
+
+  .preview_close_button:hover {
     background-color: var(--bc);
-    transition: all 0.2s;
-    margin-bottom: 0.5rem;
   }
 
-  .topic-list-item:hover {
-    background-color: var(--mc);
-    color: var(--wh);
-  }
-
-  .preview-pane {
+  .preview_content_scroll {
+    flex: 1;
     overflow-y: auto;
+  }
+
+  .preview_empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--tx);
+  }
+
+  /* リサイザー内サイドバー */
+  .resizer_sidebar_container {
+    width: var(--navW);
+    height: 100%;
     padding: var(--inline);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    cursor: col-resize;
+  }
+
+  .resizer_nav_window {
+    cursor: col-resize;
   }
 
   /* モーダル */
-  .modal-overlay {
+  .modal_overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -438,7 +477,7 @@
     z-index: 1000;
   }
 
-  .modal-content {
+  .modal_content {
     background-color: var(--bgColor);
     border-radius: var(--rad);
     padding: 2rem;
@@ -449,7 +488,7 @@
     border: var(--line);
   }
 
-  .modal-header {
+  .modal_header {
     color: var(--tx);
     margin-bottom: 1rem;
     font-size: 1.25rem;

@@ -163,7 +163,7 @@ export function DraggableSidebar({ children, sidebarContent, initialMode = 'left
   return (
 		<div
 			ref={containerRef}
-			className={`draggable-layout app_container ${currentMode} ${compact ? 'compact-sidebar' : ''}`}
+			className={`draggable-layout app_container ${currentMode} ${compact ? 'compact_sidebar' : ''}`}
 		>
 		{/* ドラッグ可能なサイドバー */}
 		<aside
