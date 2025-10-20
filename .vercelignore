@@ -1,0 +1,35 @@
+# Chrome Extension
+*.zip
+packages/extension/*.zip
+chat-kanban-extension.zip
+
+# 3D Models
+*.fbx
+*.glb
+ImageToStl.com_*
+*.rar
+
+# Export files
+chat-kanban-export*.json
+
+# HTML test files
+index*.html
+font_comparison.html
+
+# Documentation (deploy時は不要)
+DEPLOYMENT_CHECKLIST.md
+plan.md
+
+# SQL files (deploy時は不要)
+*.sql
+supabase-*.sql
+
+# Scripts
+scripts/
+
+# Extension backup
+packages/extension_backup/
+
+# Development files
+*.backup.*
+

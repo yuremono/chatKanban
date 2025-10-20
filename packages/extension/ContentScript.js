@@ -226,6 +226,12 @@
 
   async function onClickSend() {
     try {
+      // Geminiページかチェック
+      if (!location.host.includes('gemini.google.com')) {
+        alert('⚠️ このボタンはGeminiページでのみ動作します');
+        return;
+      }
+      
       const data = extractThread();
       const totalImages = (data.messages || []).reduce((sum, m) => sum + ((m.metadata?.imageUrls || []).length), 0);
       const topicIdForName = `topic_${data.threadId}`;
@@ -237,6 +243,19 @@
         urls.push(...imageUrls);
       }
       console.log('[ContentScript] Extracted image URLs:', urls);
+      
+      // 画像がある場合は、タブを開いたまま待つよう警告
+      if (urls.length > 0) {
+        const proceed = confirm(
+          `画像が${urls.length}枚検出されました。\n\n` +
+          `⚠️ アップロード中は以下を守ってください：\n` +
+          `・このタブを閉じない\n` +
+          `・別のタブに切り替えない\n` +
+          `・完了まで待つ（数秒〜数十秒）\n\n` +
+          `続行しますか？`
+        );
+        if (!proceed) return;
+      }
       
       // 現在の送信先環境を取得
       const settings = await new Promise(resolve => {

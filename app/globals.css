@@ -167,6 +167,7 @@
     @apply overflow-y-auto flex-1;
     padding: var(--inline);
     gap: var(--gap) var(--navW);
+    overflow-y: scroll;
   }
 
   /* コンテンツセクション */
