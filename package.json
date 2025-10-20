@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
     "@supabase/supabase-js": "^2.75.1",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@vercel/kv": "^3.0.0",
@@ -21,6 +23,7 @@
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.3.1",
+    "react-resizable-panels": "^3.0.6",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -8,9 +8,10 @@ interface DraggableSidebarProps {
   children?: React.ReactNode;
   sidebarContent?: React.ReactNode;
   initialMode?: LayoutMode;
+  compact?: boolean;
 }
 
-export function DraggableSidebar({ children, sidebarContent, initialMode = 'left' }: DraggableSidebarProps) {
+export function DraggableSidebar({ children, sidebarContent, initialMode = 'left', compact = false }: DraggableSidebarProps) {
   const [currentMode, setCurrentMode] = useState<LayoutMode>(initialMode);
   const [isDragging, setIsDragging] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -154,7 +155,7 @@ export function DraggableSidebar({ children, sidebarContent, initialMode = 'left
   return (
 		<div
 			ref={containerRef}
-			className={`draggable-layout app_container ${currentMode}`}
+			className={`draggable-layout app_container ${currentMode} ${compact ? 'compact-sidebar' : ''}`}
 		>
 			{/* ドラッグ可能なサイドバー */}
 			<aside

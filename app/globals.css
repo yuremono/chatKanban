@@ -113,11 +113,21 @@
       --inline: 20px;
       --gap: 16px;
     }
+    
+    /* コンパクトサイドバーモード */
+    .draggable-layout.compact-sidebar {
+      --navW: 60px;
+    }
   }
 
   @media (min-width: 1440px) {
     .draggable-layout {
       --navW: 360px;
+    }
+    
+    /* コンパクトサイドバーモード */
+    .draggable-layout.compact-sidebar {
+      --navW: 70px;
     }
   }
 
@@ -336,6 +346,114 @@
   .navigation a:hover {
     background: var(--mc);
     color: var(--wh);
+  }
+
+  /* コンパクトサイドバー用スタイル */
+  .sidebar-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+
+  .sidebar-compact .icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    color: var(--tx);
+    transition: background-color 0.2s;
+  }
+
+  .sidebar-compact .icon-button:hover {
+    background-color: var(--bc);
+  }
+
+  .sidebar-compact .divider {
+    width: 80%;
+    height: 1px;
+    background-color: var(--borderColor);
+    opacity: 0.3;
+  }
+
+  /* 2カラムグリッド */
+  .two-column-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+    padding: var(--inline);
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+  }
+
+  /* プレビューモード */
+  .preview-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .topic-list-pane {
+    border-right: var(--line);
+    overflow-y: auto;
+    padding: var(--inline);
+  }
+
+  .topic-list-item {
+    padding: 0.75rem;
+    border-radius: var(--rad);
+    cursor: pointer;
+    background-color: var(--bc);
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+  }
+
+  .topic-list-item:hover {
+    background-color: var(--mc);
+    color: var(--wh);
+  }
+
+  .preview-pane {
+    overflow-y: auto;
+    padding: var(--inline);
+  }
+
+  /* モーダル */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background-color: var(--bgColor);
+    border-radius: var(--rad);
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+    border: var(--line);
+  }
+
+  .modal-header {
+    color: var(--tx);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: bold;
   }
 
   /* コントロールボタン */

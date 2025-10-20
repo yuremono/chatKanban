@@ -1,16 +1,24 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/Button';
+import { useEffect, useState, useMemo } from 'react';
 import { KanbanCard } from '@/components/KanbanCard';
 import { DraggableSidebar } from '@/components/DraggableSidebar';
-import { DarkModeToggle } from '@/components/DarkModeToggle';
 import type { Topic } from '@/packages/shared/Types';
-import { Download, RefreshCw, Loader2, Send, Moon, Home, Filter, BarChart3 } from 'lucide-react';
+import { Download, RefreshCw, Loader2, Send, Moon, Sun, Bot } from 'lucide-react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+
+type ViewMode = 'default' | 'preview';
 
 export default function Page() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>('default');
+  const [previewTopicId, setPreviewTopicId] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(false);
+  
+  // モーダル状態
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
@@ -26,12 +34,10 @@ export default function Page() {
       if (Array.isArray(payload?.data) && payload.data.length > 0) {
         setTopics(payload.data.map((d: any) => d.topic));
       } else {
-        // /api/topicsも試す
         const t = await fetch('/api/topics', { cache: 'no-store' }).then(r => r.json());
         if (Array.isArray(t.topics) && t.topics.length > 0) {
           setTopics(t.topics);
         } else {
-          // 両方空の場合、defaultExport.jsonを読み込む
           try {
             const defaultRes = await fetch('/defaultExport.json');
             const defaultPayload = await defaultRes.json();
@@ -67,15 +73,21 @@ export default function Page() {
     }
   };
 
-  const handleSearch = async (query: string) => {
-    if (!query.trim()) {
+  const toggleDarkMode = () => {
+    const newTheme = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    setIsDark(!isDark);
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
       setSearchResults([]);
       return;
     }
 
     setSearching(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
       const data = await res.json();
       setSearchResults(data.results || []);
     } catch (err) {
@@ -116,201 +128,359 @@ export default function Page() {
     }
   };
 
+  const openPreview = (topicId: string) => {
+    setPreviewTopicId(topicId);
+    setViewMode('preview');
+  };
+
+  const closePreview = () => {
+    setViewMode('default');
+    setPreviewTopicId(null);
+  };
+
+  // 2カラム配置（左右交互）
+  const { leftColumn, rightColumn } = useMemo(() => {
+    const left: Topic[] = [];
+    const right: Topic[] = [];
+    
+    topics.forEach((topic, index) => {
+      if (index % 2 === 0) {
+        left.push(topic);
+      } else {
+        right.push(topic);
+      }
+    });
+    
+    return { leftColumn: left, rightColumn: right };
+  }, [topics]);
+
+  // プレビューモード時の一覧（プレビュー中のトピックを除く）
+  const listTopics = useMemo(() => {
+    if (viewMode === 'preview' && previewTopicId) {
+      return topics.filter(t => t.id !== previewTopicId);
+    }
+    return topics;
+  }, [topics, viewMode, previewTopicId]);
+
+  const previewTopic = useMemo(() => {
+    if (viewMode === 'preview' && previewTopicId) {
+      return topics.find(t => t.id === previewTopicId);
+    }
+    return null;
+  }, [topics, viewMode, previewTopicId]);
+
   useEffect(() => {
     fetchTopics();
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchQuery) {
-        handleSearch(searchQuery);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
   return (
     <DraggableSidebar 
       initialMode="left"
+      compact={true}
       sidebarContent={
-        <>
-          <div className="text-center mb-2">
-            <h2 className="text-lg font-bold" style={{ color: 'var(--mc)' }}>
-              Chat Kanban
-            </h2>
-            <p className="text-xs mt-1 opacity-70">ナビゲーション</p>
-          </div>
-          
-          <div className="controls flex gap-2">
-            <Button
-              size="sm"
-              onClick={() => document.documentElement.setAttribute('data-theme', 
-                document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')}
-              className="flex-1 flex items-center justify-center gap-1"
-              style={{ backgroundColor: 'var(--bc)', color: 'var(--tx)' }}
-            >
-              <Moon className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              onClick={fetchTopics}
-              disabled={loading}
-              className="flex-1 flex items-center justify-center gap-1"
-              style={{ backgroundColor: 'var(--mc)', color: 'white' }}
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-            <Button
-              size="sm"
-              onClick={exportJSON}
-              className="flex-1 flex items-center justify-center gap-1"
-              style={{ backgroundColor: 'var(--ac)', color: 'white' }}
-            >
-              <Download className="w-4 h-4" />
-            </Button>
-          </div>
+        <div className="sidebar-compact">
+          {/* ダークモードトグル */}
+          <button
+            onClick={toggleDarkMode}
+            className="icon-button"
+          >
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
 
-          {/* 検索ボックス */}
-          <div className="search-box mt-2 relative">
-            <input
-              type="text"
-              placeholder="メッセージを検索..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 pr-10 rounded-lg text-sm transition"
-              style={{
-                backgroundColor: 'var(--bc)',
-                color: 'var(--tx)',
-                border: '1px solid var(--borderColor)',
-                outline: 'none'
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = 'var(--mc)';
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'var(--borderColor)';
-              }}
-              aria-label="メッセージ検索"
-            />
-            <i 
-              className="las la-search absolute right-3 top-1/2 -translate-y-1/2"
-              style={{ 
-                color: 'var(--tx)', 
-                opacity: 0.5,
-                fontSize: '1.2rem'
-              }}
-            />
+          {/* 更新ボタン */}
+          <button
+            onClick={fetchTopics}
+            disabled={loading}
+            className="icon-button"
+            style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+
+          {/* JSONエクスポートボタン */}
+          <button
+            onClick={exportJSON}
+            className="icon-button"
+          >
+            <Download className="w-5 h-5" />
+          </button>
+
+          {/* 区切り線 */}
+          <div className="divider" />
+
+          {/* 検索ボタン */}
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className="icon-button"
+          >
+            <i className="las la-search" style={{ fontSize: '1.5rem' }} />
+          </button>
+
+          {/* AIチャットボタン */}
+          <button
+            onClick={() => setIsAiChatOpen(true)}
+            className="icon-button"
+          >
+            <Bot className="w-5 h-5" />
+          </button>
+        </div>
+      }
+    >
+      {/* メインコンテンツ */}
+      <main className="main_content">
+        {loading && topics.length === 0 ? (
+          <section className="content_section w-full flex flex-col items-center justify-center min-h-[50vh]">
+            <Loader2 className="w-8 h-8 animate-spin mb-3" style={{ color: 'var(--mc)' }} />
+            <p className="text-sm">Loading...</p>
+          </section>
+        ) : topics.length === 0 ? (
+          <section className="content_section w-full text-center py-12">
+            <p className="text-lg">トピックがありません</p>
+            <p className="text-sm mt-2" style={{ opacity: 0.7 }}>Chrome拡張機能からチャット履歴を送信してください</p>
+          </section>
+        ) : viewMode === 'default' ? (
+          // デフォルトモード：2カラム固定
+          <div className="two-column-grid">
+            {/* 左カラム */}
+            <div className="column">
+              {leftColumn.map((topic) => (
+                <div key={topic.id} onClick={() => openPreview(topic.id)} style={{ cursor: 'pointer' }}>
+                  <KanbanCard topic={topic} />
+                </div>
+              ))}
+            </div>
+
+            {/* 右カラム */}
+            <div className="column">
+              {rightColumn.map((topic) => (
+                <div key={topic.id} onClick={() => openPreview(topic.id)} style={{ cursor: 'pointer' }}>
+                  <KanbanCard topic={topic} />
+                </div>
+              ))}
+            </div>
           </div>
-          
-          {/* 検索結果表示 */}
-          {searching && (
-            <div className="text-xs text-center py-2" style={{ color: 'var(--tx)' }}>
-              検索中...
-            </div>
-          )}
-          {searchResults.length > 0 && (
-            <div className="text-xs py-2" style={{ color: 'var(--tx)' }}>
-              {searchResults.length}件の結果
-            </div>
-          )}
+        ) : (
+          // プレビューモード：一覧 + プレビュー
+          <div className="preview-layout">
+            <PanelGroup direction="horizontal" style={{ height: '100%' }}>
+              {/* 一覧ペイン */}
+              <Panel defaultSize={30} minSize={20}>
+                <div className="topic-list-pane">
+                  <h3 style={{ 
+                    color: 'var(--tx)', 
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem',
+                    opacity: 0.7
+                  }}>
+                    他のトピック
+                  </h3>
+                  <div>
+                    {listTopics.map((topic) => (
+                      <div 
+                        key={topic.id} 
+                        onClick={() => setPreviewTopicId(topic.id)}
+                        className="topic-list-item"
+                      >
+                        <div style={{ 
+                          fontSize: '0.875rem',
+                          fontWeight: '500'
+                        }}>
+                          {topic.chatTitle || topic.title}
+                        </div>
+                        <div style={{ 
+                          fontSize: '0.75rem',
+                          opacity: 0.6,
+                          marginTop: '0.25rem'
+                        }}>
+                          {new Date(topic.createdAt).toLocaleDateString('ja-JP')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Panel>
 
-          <nav className="navigation flex flex-col gap-2 mt-2">
-            <a 
-              href="#" 
-              className="px-4 py-2 rounded-lg transition font-medium no-underline flex items-center gap-2"
-              style={{ 
-                backgroundColor: 'transparent',
-                border: '1px solid var(--borderColor)',
-                color: 'var(--tx)'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--mc)';
-                e.currentTarget.style.color = 'var(--wh)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--tx)';
-              }}
-            >
-              <Home className="w-4 h-4" /> ホーム
-            </a>
-            <a 
-              href="#" 
-              className="px-4 py-2 rounded-lg transition font-medium no-underline flex items-center gap-2"
-              style={{ 
-                backgroundColor: 'transparent',
-                border: '1px solid var(--borderColor)',
-                color: 'var(--tx)'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--mc)';
-                e.currentTarget.style.color = 'var(--wh)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--tx)';
-              }}
-            >
-              <Filter className="w-4 h-4" /> フィルター
-            </a>
-            <a 
-              href="#" 
-              className="px-4 py-2 rounded-lg transition font-medium no-underline flex items-center gap-2"
-              style={{ 
-                backgroundColor: 'transparent',
-                border: '1px solid var(--borderColor)',
-                color: 'var(--tx)'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--mc)';
-                e.currentTarget.style.color = 'var(--wh)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--tx)';
-              }}
-            >
-              <BarChart3 className="w-4 h-4" /> 統計
-            </a>
-          </nav>
+              <PanelResizeHandle style={{
+                width: '4px',
+                backgroundColor: 'var(--borderColor)',
+                cursor: 'col-resize',
+                transition: 'background-color 0.2s'
+              }} />
 
-          {/* AIチャットボックス */}
-          <div className="ai-chat-box mt-4 flex-1 flex flex-col">
-            <div className="text-xs font-medium mb-2" style={{ color: 'var(--tx)' }}>
-              AIアシスタント
+              {/* プレビューペイン */}
+              <Panel defaultSize={70} minSize={40}>
+                <div className="preview-pane">
+                  {previewTopic ? (
+                    <>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        marginBottom: '1rem'
+                      }}>
+                        <h2 style={{ color: 'var(--tx)', fontSize: '1.25rem' }}>
+                          {previewTopic.chatTitle || previewTopic.title}
+                        </h2>
+                        <button
+                          onClick={closePreview}
+                          style={{
+                            background: 'none',
+                            border: '1px solid var(--borderColor)',
+                            borderRadius: '0.375rem',
+                            padding: '0.5rem 1rem',
+                            cursor: 'pointer',
+                            color: 'var(--tx)',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          ✕ 閉じる
+                        </button>
+                      </div>
+                      <KanbanCard topic={previewTopic} />
+                    </>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--tx)' }}>
+                      トピックが見つかりません
+                    </div>
+                  )}
+                </div>
+              </Panel>
+            </PanelGroup>
+          </div>
+        )}
+      </main>
+
+      {/* 検索モーダル */}
+      {isSearchOpen && (
+        <div 
+          className="modal-overlay"
+          onClick={() => setIsSearchOpen(false)}
+        >
+          <div 
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="modal-header">検索</h2>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <input
+                type="text"
+                placeholder="メッセージを検索..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSearch();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  borderRadius: 'var(--rad)',
+                  border: '1px solid var(--borderColor)',
+                  backgroundColor: 'var(--bc)',
+                  color: 'var(--tx)',
+                  outline: 'none'
+                }}
+              />
+              <button
+                onClick={handleSearch}
+                disabled={searching}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: 'var(--rad)',
+                  border: 'none',
+                  backgroundColor: 'var(--mc)',
+                  color: 'white',
+                  cursor: searching ? 'not-allowed' : 'pointer',
+                  opacity: searching ? 0.5 : 1
+                }}
+              >
+                {searching ? '検索中...' : '検索'}
+              </button>
             </div>
-            <div 
-              className="chat-history flex-1 overflow-y-auto mb-2 p-2 rounded-lg text-xs"
-              style={{
-                backgroundColor: 'var(--bc)',
-                border: '1px solid var(--borderColor)',
-                maxHeight: '200px',
-                minHeight: '100px'
-              }}
-            >
+            
+            {searchResults.length > 0 && (
+              <div style={{ marginTop: '1rem' }}>
+                <p style={{ color: 'var(--tx)', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+                  {searchResults.length}件の結果
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {searchResults.map((result, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        padding: '0.75rem',
+                        borderRadius: 'var(--rad)',
+                        backgroundColor: 'var(--bc)',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => {
+                        openPreview(result.topicId);
+                        setIsSearchOpen(false);
+                      }}
+                    >
+                      <div style={{ color: 'var(--mc)', fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                        {result.topicTitle}
+                      </div>
+                      <div style={{ color: 'var(--tx)', fontSize: '0.875rem' }}>
+                        {result.content.substring(0, 100)}...
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* AIチャットモーダル */}
+      {isAiChatOpen && (
+        <div 
+          className="modal-overlay"
+          onClick={() => setIsAiChatOpen(false)}
+        >
+          <div 
+            className="modal-content"
+            style={{ display: 'flex', flexDirection: 'column' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="modal-header">AIアシスタント</h2>
+            
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              marginBottom: '1rem',
+              padding: '1rem',
+              borderRadius: 'var(--rad)',
+              backgroundColor: 'var(--bc)',
+              minHeight: '300px'
+            }}>
               {aiChatHistory.length === 0 ? (
-                <div className="text-center opacity-50" style={{ color: 'var(--tx)' }}>
+                <div style={{ textAlign: 'center', color: 'var(--tx)', opacity: 0.5 }}>
                   AIに質問してみましょう
                 </div>
               ) : (
                 aiChatHistory.map((msg, idx) => (
                   <div 
                     key={idx} 
-                    className="mb-2"
-                    style={{ 
-                      color: msg.role === 'user' ? 'var(--mc)' : 'var(--tx)',
-                      fontWeight: msg.role === 'user' ? 'bold' : 'normal'
+                    style={{
+                      marginBottom: '1rem',
+                      padding: '0.75rem',
+                      borderRadius: 'var(--rad)',
+                      backgroundColor: msg.role === 'user' ? 'var(--mc)' : 'var(--bgColor)',
+                      color: msg.role === 'user' ? 'white' : 'var(--tx)',
+                      border: msg.role === 'user' ? 'none' : '1px solid var(--borderColor)'
                     }}
                   >
-                    <div className="text-xs opacity-70">
-                      {msg.role === 'user' ? 'あなた' : 'AI'}:
+                    <div style={{ fontSize: '0.75rem', opacity: 0.7, marginBottom: '0.25rem' }}>
+                      {msg.role === 'user' ? 'あなた' : 'AI'}
                     </div>
-                    <div>{msg.content}</div>
+                    <div style={{ fontSize: '0.875rem' }}>{msg.content}</div>
                   </div>
                 ))
               )}
             </div>
-            <div className="relative">
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
               <input
                 type="text"
                 placeholder="AIに質問..."
@@ -323,66 +493,38 @@ export default function Page() {
                   }
                 }}
                 disabled={aiLoading}
-                className="w-full px-3 py-2 pr-10 rounded-lg text-sm transition"
                 style={{
+                  flex: 1,
+                  padding: '0.75rem',
+                  borderRadius: 'var(--rad)',
+                  border: '1px solid var(--borderColor)',
                   backgroundColor: 'var(--bc)',
                   color: 'var(--tx)',
-                  border: '1px solid var(--borderColor)',
                   outline: 'none'
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--mc)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--borderColor)';
                 }}
               />
               <button
                 onClick={handleAiChat}
                 disabled={aiLoading || !aiMessage.trim()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded transition"
                 style={{
-                  backgroundColor: aiLoading || !aiMessage.trim() ? 'transparent' : 'var(--mc)',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: 'var(--rad)',
+                  border: 'none',
+                  backgroundColor: 'var(--mc)',
                   color: 'white',
-                  opacity: aiLoading || !aiMessage.trim() ? 0.3 : 1
+                  cursor: aiLoading || !aiMessage.trim() ? 'not-allowed' : 'pointer',
+                  opacity: aiLoading || !aiMessage.trim() ? 0.5 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                {aiLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
+                {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </button>
             </div>
           </div>
-
-          <div className="mt-auto pt-4 border-t text-xs text-center opacity-60" style={{ borderColor: 'var(--borderColor)' }}>
-            <p>💡 このパネルは</p>
-            <p>ドラッグで移動できます</p>
-          </div>
-        </>
-      }
-    >
-      {/* メインコンテンツ */}
-      <main className="main_content flex flex-wrap">
-
-        {/* トピック一覧 */}
-        {loading && topics.length === 0 ? (
-          <section className="content_section w-full flex flex-col items-center justify-center min-h-[50vh]" style={{ color: 'var(--tx)' }}>
-            <Loader2 className="w-8 h-8 animate-spin mb-3" style={{ color: 'var(--mc)' }} />
-            <p className="text-sm">Loading...</p>
-          </section>
-        ) : topics.length === 0 ? (
-          <section className="content_section w-full text-center py-12 text-gray-500">
-            <p className="text-lg">トピックがありません</p>
-            <p className="text-sm mt-2">Chrome拡張機能からチャット履歴を送信してください</p>
-          </section>
-        ) : (
-          topics.map((topic) => (
-            <KanbanCard key={topic.id} topic={topic} />
-          ))
-        )}
-      </main>
+        </div>
+      )}
     </DraggableSidebar>
   );
 }
