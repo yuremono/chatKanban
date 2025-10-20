@@ -170,32 +170,46 @@ async function fetchInPageAsDataUrlFromSW(url) {
         
         console.log('[CK_IMPORT] Using tab:', tabId, geminiTab.url?.substring(0, 50) + '...');
         
-        const [{ result }] = await chrome.scripting.executeScript({
-            target: { tabId },
-            func: (u) => new Promise((resolve) => {
-                console.log('[TabContext] Fetching:', u.substring(0, 80) + '...');
-                fetch(u, { credentials: 'include' })
-                    .then(r => {
-                        console.log('[TabContext] Fetch success, status:', r.status, 'type:', r.headers.get('content-type'));
-                        return r.blob();
-                    })
-                    .then(b => { 
-                        console.log('[TabContext] Blob size:', (b.size / 1024).toFixed(2), 'KB');
-                        const fr = new FileReader(); 
-                        fr.onload = () => resolve(String(fr.result || '')); 
-                        fr.onerror = () => {
-                            console.error('[TabContext] FileReader error');
+        let scriptResults;
+        try {
+            scriptResults = await chrome.scripting.executeScript({
+                target: { tabId },
+                func: (u) => new Promise((resolve) => {
+                    console.log('[TabContext] Fetching:', u.substring(0, 80) + '...');
+                    fetch(u, { credentials: 'include' })
+                        .then(r => {
+                            console.log('[TabContext] Fetch success, status:', r.status, 'type:', r.headers.get('content-type'));
+                            return r.blob();
+                        })
+                        .then(b => { 
+                            console.log('[TabContext] Blob size:', (b.size / 1024).toFixed(2), 'KB');
+                            const fr = new FileReader(); 
+                            fr.onload = () => resolve(String(fr.result || '')); 
+                            fr.onerror = () => {
+                                console.error('[TabContext] FileReader error');
+                                resolve(null);
+                            };
+                            fr.readAsDataURL(b); 
+                        })
+                        .catch((e) => {
+                            console.error('[TabContext] Fetch error:', e.message || e);
                             resolve(null);
-                        };
-                        fr.readAsDataURL(b); 
-                    })
-                    .catch((e) => {
-                        console.error('[TabContext] Fetch error:', e.message || e);
-                        resolve(null);
-                    });
-            }),
-            args: [url]
-        });
+                        });
+                }),
+                args: [url]
+            });
+        } catch (executeError) {
+            console.error('[CK_IMPORT] executeScript failed:', executeError.message || executeError);
+            console.error('[CK_IMPORT] This may be due to: tab permissions, CSP, or network restrictions');
+            return null;
+        }
+        
+        if (!scriptResults || scriptResults.length === 0) {
+            console.error('[CK_IMPORT] No script results returned');
+            return null;
+        }
+        
+        const [{ result }] = scriptResults;
         return result || null;
     }
     catch (e) {
