@@ -53,14 +53,36 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           }
         }
         console.log('[CK_IMPORT] Total uploaded:', uploaded.length, uploaded);
-
-        // 2) ペイロードへ反映（最初のassistantへ付与。なければ追加）
+        
+        // 2) 全てのメッセージから元のGoogleURLを削除
+        data.messages.forEach((m: any) => {
+          if (m.metadata?.imageUrls) {
+            // GoogleユーザーコンテンツのURLを削除
+            const filtered = m.metadata.imageUrls.filter((url: string) => {
+              return typeof url === 'string' && !url.includes('googleusercontent.com');
+            });
+            if (filtered.length === 0) {
+              delete m.metadata.imageUrls;
+            } else {
+              m.metadata.imageUrls = filtered;
+            }
+          }
+        });
+        
+        // 3) アップロード成功した画像URLを最初のassistantに設定
         if (uploaded.length > 0) {
           const firstAssistant = data.messages.find((m: any) => m.role === 'assistant');
           if (firstAssistant) {
-            firstAssistant.metadata = Object.assign({}, firstAssistant.metadata || {}, { imageUrls: uploaded });
+            if (!firstAssistant.metadata) firstAssistant.metadata = {};
+            firstAssistant.metadata.imageUrls = uploaded;
           } else {
-            data.messages.push({ role: 'assistant', content: '', model: 'unknown', timestamp: new Date().toISOString(), metadata: { imageUrls: uploaded } });
+            data.messages.push({ 
+              role: 'assistant', 
+              content: '', 
+              model: 'unknown', 
+              timestamp: new Date().toISOString(), 
+              metadata: { imageUrls: uploaded } 
+            });
           }
         }
 
