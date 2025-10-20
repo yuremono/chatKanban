@@ -16,6 +16,7 @@ export default function Page() {
   const [previewTopicId, setPreviewTopicId] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
   const [previewPanelSizes, setPreviewPanelSizes] = useState<number[]>([30, 70]);
+  const [sidebarMode, setSidebarMode] = useState<'left' | 'center' | 'right'>('left');
   
   // モーダル状態
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -195,6 +196,7 @@ export default function Page() {
     <DraggableSidebar 
       initialMode="left"
       compact={true}
+      onModeChange={setSidebarMode}
       sidebarContent={
         <div className="sidebar-compact">
           {/* タイトル */}
@@ -285,8 +287,175 @@ export default function Page() {
               ))}
             </div>
           </div>
+        ) : sidebarMode === 'center' ? (
+          // センターモード：プレビュー（3ペイン）
+          <div className="preview-layout">
+            <PanelGroup 
+              direction="horizontal" 
+              style={{ height: '100vh' }}
+              onLayout={handlePanelResize}
+            >
+              {/* 左エリア（一覧） */}
+              <Panel defaultSize={previewPanelSizes[0]} minSize={20}>
+                <div style={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column'
+                }}>
+                  <h3 style={{ 
+                    color: 'var(--tx)', 
+                    padding: 'var(--inline)',
+                    margin: 0,
+                    fontSize: '0.875rem',
+                    opacity: 0.7,
+                    borderBottom: 'var(--line)'
+                  }}>
+                    他のトピック
+                  </h3>
+                  <div style={{ 
+                    flex: 1,
+                    overflowY: 'auto',
+                    padding: 'var(--inline)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--gap)'
+                  }}>
+                    {listTopics.map((topic) => (
+                      <KanbanCard 
+                        key={topic.id} 
+                        topic={topic} 
+                        onPreview={(id) => setPreviewTopicId(id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </Panel>
+
+              {/* リサイザー（サイドバー幅） */}
+              <PanelResizeHandle>
+                <div style={{
+                  width: 'var(--navW)',
+                  height: '100%',
+                  backgroundColor: 'var(--navBg)',
+                  borderLeft: 'var(--line)',
+                  borderRight: 'var(--line)',
+                  cursor: 'col-resize',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <div className="sidebar-compact">
+                    {/* タイトル */}
+                    <div style={{ 
+                      textAlign: 'center', 
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold',
+                      color: 'var(--mc)',
+                      lineHeight: '1.2',
+                      marginBottom: '0.5rem'
+                    }}>
+                      chat<br />kanban
+                    </div>
+
+                    {/* ダークモードトグル */}
+                    <button
+                      onClick={toggleDarkMode}
+                      className="icon-button"
+                    >
+                      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    </button>
+
+                    {/* 更新ボタン */}
+                    <button
+                      onClick={fetchTopics}
+                      disabled={loading}
+                      className="icon-button"
+                      style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+                    >
+                      <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
+
+                    {/* JSONエクスポートボタン */}
+                    <button
+                      onClick={exportJSON}
+                      className="icon-button"
+                    >
+                      <Download className="w-5 h-5" />
+                    </button>
+
+                    {/* 区切り線 */}
+                    <div className="divider" />
+
+                    {/* 検索ボタン */}
+                    <button
+                      onClick={() => setIsSearchOpen(true)}
+                      className="icon-button"
+                    >
+                      <i className="las la-search" style={{ fontSize: '1.5rem' }} />
+                    </button>
+
+                    {/* AIチャットボタン */}
+                    <button
+                      onClick={() => setIsAiChatOpen(true)}
+                      className="icon-button"
+                    >
+                      <MessageCircleMore className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </PanelResizeHandle>
+
+              {/* 右エリア（プレビュー） */}
+              <Panel defaultSize={previewPanelSizes[1]} minSize={40}>
+                <div style={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column'
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: 'var(--inline)',
+                    borderBottom: 'var(--line)'
+                  }}>
+                    <h2 style={{ color: 'var(--tx)', fontSize: '1.25rem', margin: 0 }}>
+                      {previewTopic ? (previewTopic.chatTitle || previewTopic.title) : 'プレビュー'}
+                    </h2>
+                    <button
+                      onClick={closePreview}
+                      style={{
+                        background: 'none',
+                        border: '1px solid var(--borderColor)',
+                        borderRadius: 'var(--rad)',
+                        padding: '0.5rem 1rem',
+                        cursor: 'pointer',
+                        color: 'var(--tx)',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      ✕ 閉じる
+                    </button>
+                  </div>
+                  <div style={{ 
+                    flex: 1,
+                    overflowY: 'auto',
+                    padding: 'var(--inline)'
+                  }}>
+                    {previewTopic ? (
+                      <KanbanCard topic={previewTopic} />
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--tx)' }}>
+                        トピックが見つかりません
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Panel>
+            </PanelGroup>
+          </div>
         ) : (
-          // プレビューモード：一覧 + プレビュー
+          // 左/右モード：プレビュー（2ペイン）
           <div className="preview-layout">
             <PanelGroup 
               direction="horizontal" 

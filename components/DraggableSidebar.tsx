@@ -9,9 +9,10 @@ interface DraggableSidebarProps {
   sidebarContent?: React.ReactNode;
   initialMode?: LayoutMode;
   compact?: boolean;
+  onModeChange?: (mode: LayoutMode) => void;
 }
 
-export function DraggableSidebar({ children, sidebarContent, initialMode = 'left', compact = false }: DraggableSidebarProps) {
+export function DraggableSidebar({ children, sidebarContent, initialMode = 'left', compact = false, onModeChange }: DraggableSidebarProps) {
   const [currentMode, setCurrentMode] = useState<LayoutMode>(initialMode);
   const [isDragging, setIsDragging] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -101,6 +102,9 @@ export function DraggableSidebar({ children, sidebarContent, initialMode = 'left
 				// モードが変わった場合のみ更新
 				if (targetMode !== currentMode) {
 					setCurrentMode(targetMode);
+					if (onModeChange) {
+						onModeChange(targetMode);
+					}
 				}
 			};
 
@@ -127,6 +131,9 @@ export function DraggableSidebar({ children, sidebarContent, initialMode = 'left
 				}
 
 				setCurrentMode(finalMode);
+				if (onModeChange) {
+					onModeChange(finalMode);
+				}
 
 				// ドロップ時にスタイル属性を解除
 				navRef.current.style.left = "";
