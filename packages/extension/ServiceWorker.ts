@@ -29,17 +29,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
               console.warn('[CK_IMPORT] Failed to fetch dataUrl for:', src);
               continue;
             }
-            
-            // DataURLサイズチェック（約4MB以下に制限）
-            const sizeInBytes = Math.ceil(dataUrl.length * 0.75); // Base64は約33%増加するので逆算
-            const sizeInMB = (sizeInBytes / 1024 / 1024).toFixed(2);
-            console.log('[CK_IMPORT] Image size:', sizeInMB, 'MB');
-            
-            if (sizeInBytes > 4 * 1024 * 1024) {
-              console.warn('[CK_IMPORT] Image too large (', sizeInMB, 'MB), skipping:', src);
-              continue;
-            }
-            
             console.log('[CK_IMPORT] Uploading to:', `${apiBase}/api/upload-dataurl`);
             const r = await fetch(`${apiBase}/api/upload-dataurl`, {
               method: 'POST', headers: { 'content-type': 'application/json' },
@@ -64,36 +53,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           }
         }
         console.log('[CK_IMPORT] Total uploaded:', uploaded.length, uploaded);
-        
-        // 2) 全てのメッセージから元のGoogleURLを削除
-        data.messages.forEach((m: any) => {
-          if (m.metadata?.imageUrls) {
-            // GoogleユーザーコンテンツのURLを削除
-            const filtered = m.metadata.imageUrls.filter((url: string) => {
-              return typeof url === 'string' && !url.includes('googleusercontent.com');
-            });
-            if (filtered.length === 0) {
-              delete m.metadata.imageUrls;
-            } else {
-              m.metadata.imageUrls = filtered;
-            }
-          }
-        });
-        
-        // 3) アップロード成功した画像URLを最初のassistantに設定
+
+        // 2) ペイロードへ反映（最初のassistantへ付与。なければ追加）
         if (uploaded.length > 0) {
           const firstAssistant = data.messages.find((m: any) => m.role === 'assistant');
           if (firstAssistant) {
-            if (!firstAssistant.metadata) firstAssistant.metadata = {};
-            firstAssistant.metadata.imageUrls = uploaded;
+            firstAssistant.metadata = Object.assign({}, firstAssistant.metadata || {}, { imageUrls: uploaded });
           } else {
-            data.messages.push({ 
-              role: 'assistant', 
-              content: '', 
-              model: 'unknown', 
-              timestamp: new Date().toISOString(), 
-              metadata: { imageUrls: uploaded } 
-            });
+            data.messages.push({ role: 'assistant', content: '', model: 'unknown', timestamp: new Date().toISOString(), metadata: { imageUrls: uploaded } });
           }
         }
 
@@ -109,13 +76,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           body: JSON.stringify(data),
         });
         const json = await res.json().catch(() => ({}));
-        sendResponse({ 
-          ok: res.ok, 
-          result: json, 
-          status: res.status,
-          uploadedImages: uploaded.length,
-          totalImages: (urls || []).length
-        });
+        sendResponse({ ok: res.ok, result: json, status: res.status });
       } catch (e: any) {
         sendResponse({ ok: false, error: e?.message || String(e) });
       }
@@ -155,63 +116,22 @@ async function getSettings(): Promise<{ apiBase: string; token: string | null }>
 // ページ文脈でしか取得できない画像を、SWから tabs.executeScript 相当で評価してDataURL取得
 async function fetchInPageAsDataUrlFromSW(url: string): Promise<string | null> {
   try {
-    // まず、Geminiのタブを探す（アクティブでなくても良い）
-    const allTabs = await chrome.tabs.query({});
-    const geminiTab = allTabs.find(tab => 
-      tab.url && tab.url.includes('gemini.google.com')
-    );
-    
-    const tabId = geminiTab?.id;
-    if (!tabId) {
-      console.error('[CK_IMPORT] Gemini tab not found. Please keep Gemini tab open.');
-      return null;
-    }
-    
-    console.log('[CK_IMPORT] Using tab:', tabId, geminiTab.url?.substring(0, 50) + '...');
-    
-    let scriptResults: any;
-    try {
-      scriptResults = await chrome.scripting.executeScript({
-        target: { tabId },
-        func: (u: string) => new Promise<string | null>((resolve) => {
-          console.log('[TabContext] Fetching:', u.substring(0, 80) + '...');
-          fetch(u, { credentials: 'include' })
-            .then(r => {
-              console.log('[TabContext] Fetch success, status:', r.status, 'type:', r.headers.get('content-type'));
-              return r.blob();
-            })
-            .then(b => { 
-              console.log('[TabContext] Blob size:', (b.size / 1024).toFixed(2), 'KB');
-              const fr = new FileReader(); 
-              fr.onload = () => resolve(String(fr.result || '')); 
-              fr.onerror = () => {
-                console.error('[TabContext] FileReader error');
-                resolve(null);
-              };
-              fr.readAsDataURL(b); 
-            })
-            .catch((e) => {
-              console.error('[TabContext] Fetch error:', e.message || e);
-              resolve(null);
-            });
-        }),
-        args: [url]
-      });
-    } catch (executeError: any) {
-      console.error('[CK_IMPORT] executeScript failed:', executeError.message || executeError);
-      console.error('[CK_IMPORT] This may be due to: tab permissions, CSP, or network restrictions');
-      return null;
-    }
-    
-    if (!scriptResults || scriptResults.length === 0) {
-      console.error('[CK_IMPORT] No script results returned');
-      return null;
-    }
-    
-    const [{ result }] = scriptResults;
+    // 直近アクティブタブで評価
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tabId = tabs?.[0]?.id;
+    if (!tabId) return null;
+    const [{ result }] = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: (u: string) => new Promise<string | null>((resolve) => {
+        fetch(u, { credentials: 'include' })
+          .then(r => r.blob())
+          .then(b => { const fr = new FileReader(); fr.onload = () => resolve(String(fr.result||'')); fr.readAsDataURL(b); })
+          .catch(() => resolve(null));
+      }),
+      args: [url]
+    }) as any;
     return (result as string) || null;
-  } catch (e: any) {
-    console.error('[CK_IMPORT] Script execution error:', e.message || e);
+  } catch {
     return null;
   }
 }

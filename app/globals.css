@@ -160,7 +160,7 @@
 
   /* センターモード時のコンテンツ調整 */
   .app_container.center .content_section {
-    width: calc(50% - var(--navW) / 2 - var(--inline));
+    width: calc(50% - var(--navW) / 2  - var(--inline));
     
   }
 
@@ -168,10 +168,9 @@
   .main_content {
     @apply overflow-y-auto flex-1;
     padding: var(--inline);
-    gap: var(--gap) var(--navW);
+    gap: var(--gap) calc(var(--navW) + var(--inline)*2 );
     overflow-y: scroll;
     height: 100vh;
-
   }
 
   /* コンテンツセクション */
@@ -183,7 +182,7 @@
   }
 
   .content_section:is(.center *) {
-    width: calc(50% - var(--navW) / 2);
+    width: calc(50% - var(--navW) / 2 - var(--inline));
   }
 
   .content_section h1 {
@@ -257,7 +256,7 @@
     }
 
     .nav_section:is(.center *) {
-      left: calc(50% - var(--navW) / 2);
+      left: calc(50% - var(--navW) / 2 );
     }
   }
 
@@ -269,15 +268,16 @@
     left: calc(100% - var(--navW));
   }
 
-  .nav_section.center {
+  /* .nav_section.center {
     left: calc(50% - var(--navW) / 2);
-  }
+  } */
 
-  /* ドラッグエリア */
-  .drag_area {
-    @apply absolute top-0 left-0 right-0 bottom-0 cursor-move;
+  /* ドラッグエリア（コメントアウト - 不要になった） */
+  /* .drag_area {
+    @apply absolute cursor-move;
     z-index: 10;
-  }
+    inset:0;
+  } */
 
   /* ナビゲーションウィンドウ */
   .nav_window {
@@ -288,13 +288,28 @@
     height: 100%;
     z-index: 20;
     color: var(--tx);
+    /* cursor: grab; は DraggableSidebar.tsx で動的に設定 */
   }
 
-  @media (min-width: 1024px) {
+  /* インタラクティブな要素では通常のカーソルに */
+  .nav_window button,
+  .nav_window a,
+  .nav_window input,
+  .nav_window select,
+  .nav_window textarea {
+    cursor: pointer !important;
+  }
+
+  .nav_window input,
+  .nav_window textarea {
+    cursor: text !important;
+  }
+
+  /* @media (min-width: 1024px) {
     .nav_window {
       height: 60%;
     }
-  }
+  } */
   
   .nav_window a {
     color: var(--tx);

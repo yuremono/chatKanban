@@ -18,10 +18,34 @@ export function DraggableSidebar({ children, sidebarContent, initialMode = 'left
   const dragOffsetRef = useRef(0);
 
   useEffect(() => {
-    const dragArea = navRef.current?.querySelector('.drag_area') as HTMLElement;
-    if (!dragArea || !navRef.current || !containerRef.current) return;
+    const navWindow = navRef.current?.querySelector('.nav_window') as HTMLElement;
+    if (!navWindow || !navRef.current || !containerRef.current) return;
+
+    // インタラクティブな要素かどうかをチェック
+    const isInteractiveElement = (target: HTMLElement): boolean => {
+      // ボタン、リンク、input等のインタラクティブな要素
+      if (target.matches('button, a, input, select, textarea, [role="button"]')) {
+        return true;
+      }
+      // 親要素を辿ってチェック
+      let parent = target.parentElement;
+      while (parent && parent !== navRef.current) {
+        if (parent.matches('button, a, input, select, textarea, [role="button"]')) {
+          return true;
+        }
+        parent = parent.parentElement;
+      }
+      return false;
+    };
 
     const startDrag = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      
+      // インタラクティブな要素ではドラッグしない
+      if (isInteractiveElement(target)) {
+        return;
+      }
+
       e.preventDefault();
       setIsDragging(true);
       navRef.current?.classList.add('dragging');
@@ -102,25 +126,35 @@ export function DraggableSidebar({ children, sidebarContent, initialMode = 'left
       document.addEventListener('touchend', handleEnd);
     };
 
-    dragArea.addEventListener('mousedown', startDrag as any);
-    dragArea.addEventListener('touchstart', startDrag as any);
+    navWindow.addEventListener('mousedown', startDrag as any);
+    navWindow.addEventListener('touchstart', startDrag as any);
 
     return () => {
-      dragArea.removeEventListener('mousedown', startDrag as any);
-      dragArea.removeEventListener('touchstart', startDrag as any);
+      navWindow.removeEventListener('mousedown', startDrag as any);
+      navWindow.removeEventListener('touchstart', startDrag as any);
     };
   }, [currentMode]);
 
   return (
     <div ref={containerRef} className={`draggable-layout app_container ${currentMode}`}>
       {/* ドラッグ可能なサイドバー */}
-      <aside ref={navRef} className={`nav_section ${currentMode}`}>
-        <div className="drag_area"></div>
-        <div className="nav_window">
+      <aside 
+        ref={navRef} 
+        className={`nav_section ${currentMode}`}
+        role="complementary"
+        aria-label="ドラッグ可能なサイドバーナビゲーション"
+      >
+        {/* <div className="drag_area"></div> */}
+        <div 
+          className="nav_window"
+          role="region"
+          aria-label="ナビゲーションパネル"
+          style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        >
           <div className="nav_content flex flex-col gap-4 h-full">
             {sidebarContent || (
               <>
-                <div className="text-center mb-4">
+                <div className="text-center mb-2">
                   <h2 className="text-lg font-bold" style={{ color: 'var(--mc)' }}>
                     Chat Kanban
                   </h2>
@@ -129,21 +163,58 @@ export function DraggableSidebar({ children, sidebarContent, initialMode = 'left
                 
                 <div className="controls flex gap-2">
                   <button 
-                    className="control_btn flex-1 px-3 py-2 rounded-lg text-white text-sm font-medium transition"
-                    style={{ backgroundColor: 'var(--mc)' }}
-                    onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
-                    onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
-                  >
-                    設定
-                  </button>
-                  <button 
                     className="control_btn flex-1 px-3 py-2 rounded-lg text-sm font-medium transition"
                     style={{ backgroundColor: 'var(--bc)', color: 'var(--tx)' }}
                     onMouseOver={(e) => e.currentTarget.style.opacity = '0.8'}
                     onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+                    aria-label="ダークモード切り替え"
                   >
                     🌙
                   </button>
+                  <button 
+                    className="control_btn flex-1 px-3 py-2 rounded-lg text-white text-sm font-medium transition"
+                    style={{ backgroundColor: 'var(--mc)' }}
+                    onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+                    onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+                    aria-label="データ更新"
+                  >
+                    🔄
+                  </button>
+                  <button 
+                    className="control_btn flex-1 px-3 py-2 rounded-lg text-white text-sm font-medium transition"
+                    style={{ backgroundColor: 'var(--ac)' }}
+                    onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
+                    onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+                    aria-label="JSONエクスポート"
+                  >
+                    📦
+                  </button>
+                </div>
+
+                {/* 検索ボックス */}
+                <div className="search-box mt-2">
+                  <input
+                    type="text"
+                    placeholder="🔍 メッセージを検索..."
+                    className="w-full px-3 py-2 rounded-lg text-sm transition"
+                    style={{
+                      backgroundColor: 'var(--bc)',
+                      color: 'var(--tx)',
+                      border: '1px solid var(--borderColor)',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--mc)';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--borderColor)';
+                    }}
+                    onChange={(e) => {
+                      // TODO: 検索機能の実装
+                      console.log('Search query:', e.target.value);
+                    }}
+                    aria-label="メッセージ検索"
+                  />
                 </div>
                 
                 <nav className="navigation flex flex-col gap-2 mt-4">

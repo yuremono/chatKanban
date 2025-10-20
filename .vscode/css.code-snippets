@@ -1,63 +1,732 @@
 {
-  "CSS Variable": {
-    "prefix": "var",
-    "body": ["var(--$1)$0"],
-    "description": "CSS custom property (variable)"
-  },
-  "CSS Calc with Variable": {
-    "prefix": "calcvar",
-    "body": ["calc($1 - var(--$2))$0"],
-    "description": "CSS calc with variable"
-  },
-  "Inline Padding Variable": {
-    "prefix": "inline",
-    "body": ["var(--inline)"],
-    "description": "Inline padding variable"
-  },
-  "Gap Variable": {
-    "prefix": "gap",
-    "body": ["var(--gap)"],
-    "description": "Gap variable"
-  },
-  "Nav Width Variable": {
-    "prefix": "navw",
-    "body": ["var(--navW)"],
-    "description": "Navigation width variable"
-  },
-  "Main Color Variable": {
-    "prefix": "mc",
-    "body": ["var(--mc)"],
-    "description": "Main color variable"
-  },
-  "Secondary Color Variable": {
-    "prefix": "sc",
-    "body": ["var(--sc)"],
-    "description": "Secondary color variable"
-  },
-  "Text Color Variable": {
-    "prefix": "tx",
-    "body": ["var(--tx)"],
-    "description": "Text color variable"
-  },
-  "Background Color Variable": {
-    "prefix": "bg",
-    "body": ["var(--bgColor)"],
-    "description": "Background color variable"
-  },
-  "Border Variable": {
-    "prefix": "line",
-    "body": ["var(--line)"],
-    "description": "Border line variable"
-  },
-  "Border Radius Variable": {
-    "prefix": "rad",
-    "body": ["var(--rad)"],
-    "description": "Border radius variable"
-  },
-  "Transition Variable": {
-    "prefix": "tr",
-    "body": ["var(--tr)"],
-    "description": "Transition duration variable"
-  }
-}
 
+        "@extend %": {
+                "prefix": "ex;","body": [
+                        "@extend %$1;"
+                ],"description": "@extend %"
+        },
+        "{#url}/image": {
+                "prefix": "url","body": [
+                        "{#url}/image/service/logo.png"
+                ],"description": "-webkit-text-stroke:"
+        },
+        "-webkit-text-stroke:": {
+                "prefix": "-wk;","body": [
+                        "-webkit-text-stroke: 2px var(--bc);",
+                        "paint-order:stroke;"
+                ],"description": "-webkit-text-stroke:"
+        },
+        "@media (max-width : px){": {
+                "prefix": "@mm;","body": [
+                        "@media (max-width : $1px){",
+                        "    $2",
+                        "}"
+                ],"description": "@media (max-width : px){"
+        },
+        // "@media (width <= px){": {
+        // 	"prefix": "@mm;","body": [
+        // 		"@media (width <= $1px){",
+        // 		"    $2",
+        // 		"}"
+        // 	],"description": "@media (width <= px){"
+        // },
+        "@media (max-width: 1800px){": {
+                "prefix": "@m8;","body": [
+                        "@media (max-width: 1800px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 1800px){"
+        },
+        "@media (max-width: 1680px){": {
+                "prefix": "@m6;","body": [
+                        "@media (max-width: 1680px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 1680px){"
+        },
+        "@media (max-width: 1536px){": {
+                "prefix": "@m5;","body": [
+                        "@media (max-width: 1536px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 1536px){"
+        },
+        "@media (max-width: 1560px){": {
+                "prefix": "@m5;","body": [
+                        "@media (max-width: 1560px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 1560px){"
+        },
+        "@media (max-width: 1440px){": {
+                "prefix": "@m4;","body": [
+                        "@media (max-width: 1440px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 1440px){"
+        },
+        "@media (max-width: 1320px){": {
+                "prefix": "@m3;","body": [
+                        "@media (max-width: 1320px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 1320px){"
+        },
+        "@media (max-width: 1200px){": {
+                "prefix": "@m2;","body": [
+                        "@media (max-width: 1200px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 1200px){"
+        },
+        "@media (max-width: 1080px){": {
+                "prefix": "@m0;","body": [
+                        "@media (max-width: 1080px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 1080px){"
+        },
+        "@media (max-width: 960px){": {
+                "prefix": "@m9;","body": [
+                        "@media (max-width: 960px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 960px){"
+        },
+        "@media (max-width: 834px){": {
+                "prefix": "@m8;","body": [
+                        "@media (max-width: 834px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 834px){"
+        },
+        "@media (max-width: 640px){": {
+                "prefix": "@m6;","body": [
+                        "@media (max-width: 640px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 640px){"
+        },
+        "@media (max-width: 480px){": {
+                "prefix": "@m4;","body": [
+                        "@media (max-width: 480px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 480px){"
+        },
+        "@media (max-width: 420px){": {
+                "prefix": "@m4;","body": [
+                        "@media (max-width: 420px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 420px){"
+        },
+        "@media (max-width: 380px){": {
+                "prefix": "@m3;","body": [
+                        "@media (max-width: 380px){",
+                        "    $1",
+                        "}"
+                ],"description": "@media (max-width: 380px){"
+        },
+            "container-type: inline-size;": {
+                "prefix": "ct;",
+                "body": [
+                    "container-type: inline-size;"
+                ],
+                "description": ""
+            },
+            "color-mix": {
+                "prefix": "clm;",
+                "body": [
+                    "color-mix(in srgb, currentColor 20%, transparent)"
+                ],
+                "description": ""
+            },
+            "&:after dn": {
+                "prefix": "&afdn;",
+                "body": [
+                    "&:after{display: none;}"
+                ],
+                "description": ""
+            },
+            // "unquote shorthand": {
+            //     "prefix": "uq;",
+            //     "body": [
+            //         "unquote('clamp($1px, $2vw, $3px)');"
+            //     ],
+            //     "description": ""
+            // },
+            "background radial": {
+                "prefix": "bgl;",
+                "body": [
+                    "background: radial-gradient(closest-side, $1) no-repeat center/100% 100%;"
+                ],
+                "description": ""
+            },
+            "background linear": {
+                "prefix": "bgl;",
+                "body": [
+                    "background: linear-gradient(to right, $1) no-repeat center/100% 100%;"
+                ],
+                "description": ""
+            },
+            "background url../image": {
+                "prefix": "bgu;",
+                "body": [
+                    "background: url(../image/service/$1.png) no-repeat center/100% 100%;"
+                ],
+                "description": ""
+            },
+            "background url": {
+                "prefix": "bgu;",
+                "body": [
+                    "background: url(/images/home/$1.png) no-repeat center/100% 100%;"
+                ],
+                "description": ""
+            },
+            "mask shorthand../image": {
+                "prefix": "mask;",
+                "body": [
+                    "mask: url(../image/service/$1.png) no-repeat center/100% 100%;"
+                ],
+                "description": ""
+            },
+            "mask shorthand": {
+                "prefix": "mask;",
+                "body": [
+                    "mask: url(/images/home/$1.png) no-repeat center/100% 100%;"
+                ],
+                "description": ""
+            },
+            "--rewrite custom prop": {
+                "prefix": "---;",
+                "body": [
+                    "--$1: $2;"
+                ],
+                "description": ""
+            },
+            "webkit-text-stroke": {
+                "prefix": "-wk;",
+                "body": [
+                    "-webkit-text-stroke: 1$1px var(--$2);"
+                ],
+                "description": ""
+            },
+            "counter-": {
+                "prefix": "coun;",
+                "body": [
+                    "counter-increment:cnt;",
+                    "&:before{",
+                    "    content:counter( cnt, decimal-leading-zero );",
+                    "}"
+                ],
+                "description": ""
+            },
+            "transparent": {
+                "prefix": "transparent",
+                "body": [
+                    "transparent"
+                ],
+                "description": ""
+            },
+            ":nth-(": {
+                "prefix": ":tt",
+                "body": [
+                    ":nth-child($1){",
+                    "    $2",
+                    "}"
+                ],
+                "description": ""
+            },
+            ":not(": {
+                "prefix": ":nn",
+                "body": [
+                    ":not($1){",
+                    "    $2",
+                    "}"
+                ],
+                "description": ""
+            },
+            ":has(": {
+                "prefix": ":hh;",
+                "body": [
+                    ":has($1){",
+                    "    $2",
+                    "}"
+                ],
+                "description": ""
+            },
+            ":where(": {
+                "prefix": ":ww;",
+                "body": [
+                    ":where($1){",
+                    "    $2",
+                    "}"
+                ],
+                "description": ""
+            },
+            ":is()": {
+                "prefix": ":ii;",
+                "body": [
+                    ":is($1){",
+                    "    $2",
+                    "}"
+                ],
+                "description": ""
+            },
+            ":is(#header )": {
+                "prefix": ":ic;",
+                "body": [
+                    ":is(#header *){",
+                    "    $2",
+                    "}"
+                ],
+                "description": ""
+            },
+            ":is(#footer )": {
+                "prefix": ":ic;",
+                "body": [
+                    ":is(#footer *){",
+                    "    $2",
+                    "}"
+                ],
+                "description": ""
+            },
+            ":is(#contents )": {
+                "prefix": ":ic;",
+                "body": [
+                    ":is(#contents *){",
+                    "    $2",
+                    "}"
+                ],
+                "description": ""
+            },
+            "border-radius": {
+                "prefix": "br;",
+                "body": [
+                    "border-radius: $1;"
+                ],
+                "description": ""
+            },
+            "/* */": {
+                "prefix": "/;",
+                "body": [
+                    "/* $1 */"
+                ],
+                "description": ""
+            },
+            "@extend %cont;": {
+                "prefix": "@ec;",
+                "body": [
+                    "@extend %cont;"
+                ],
+                "description": ""
+            },
+            "@include switch;": {
+                "prefix": "@is;",
+                "body": [
+                    "@include switch{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include menu;": {
+                "prefix": "@im;",
+                "body": [
+                    "@include menu{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include base;": {
+                "prefix": "@ib;",
+                "body": [
+                    "@include base{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include sp;": {
+                "prefix": "@is;",
+                "body": [
+                    "@include sp{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include tab;": {
+                "prefix": "@it;",
+                "body": [
+                    "@include tab{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp960;": {
+                "prefix": "@i96;",
+                "body": [
+                    "@include bp960{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp480;": {
+                "prefix": "@i48;",
+                "body": [
+                    "@include bp480{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp1560;": {
+                "prefix": "@i44;",
+                "body": [
+                    "@include bp1560{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp1440;": {
+                "prefix": "@i4;",
+                "body": [
+                    "@include bp1440{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp1400;": {
+                "prefix": "@i4;",
+                "body": [
+                    "@include bp1400{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp1320;": {
+                "prefix": "@i3;",
+                "body": [
+                    "@include bp1320{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp1300;": {
+                "prefix": "@i3;",
+                "body": [
+                    "@include bp1300{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp1200;": {
+                "prefix": "@i2;",
+                "body": [
+                    "@include bp1200{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@include bp1080;": {
+                "prefix": "@i0;",
+                "body": [
+                    "@include bp1080{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "writing-mode: vertical-rl;": {
+                "prefix": "wmvr;",
+                "body": [
+                    "writing-mode: vertical-rl;"
+                ],
+                "description": ""
+            },
+            "flex-wrap": {
+                "prefix": "fw;",
+                "body": [
+                    "flex-wrap: no$1wrap;"
+                ],
+                "description": ""
+            },
+            "flex-direction": {
+                "prefix": "fd;",
+                "body": [
+                    "flex-direction: column$1;"
+                ],
+                "description": ""
+            },
+            "flexEmpty": {
+                "prefix": "df;",
+                "body": [
+                    "display: flex;align-items: $1;justify-content: $2;flex-direction: $3;flex-wrap: $4;gap: $5%;"
+                ],
+                "description": ""
+            },
+            "flexFill": {
+                "prefix": "df;",
+                "body": [
+                    "display: flex;align-items: center$1;justify-content: center$2;flex-direction: row$3;flex-wrap: nowrap$4;gap: 0%$5;"
+                ],
+                "description": ""
+            },
+            "flexcenter": {
+                "prefix": "fc;",
+                "body": [
+                    "display: flex;flex-direction: column;justify-content: center;"
+                ],
+                "description": ""
+            },
+            "gridcenter": {
+                "prefix": "gc;",
+                "body": [
+                    "display: grid;place-items: center;place-content: center;"
+                ],
+                "description": ""
+            },
+            "@af": {
+                "prefix": "af;",
+                "body": [
+                    "@extend %af;",
+                    "&:after{",
+                    "   content:'';",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@bf": {
+                "prefix": "bf;",
+                "body": [
+                    "@extend %bf;",
+                    "&:before{",
+                    "   content:'';",
+                    "}"
+                ],
+                "description": ""
+            },
+            "@bg": {
+                "prefix": "@b;",
+                "body": [
+                    "@extend %bgin;"
+                ],
+                "description": ""
+            },
+            "calc100vw": {
+                "prefix": "ccw;",
+                "body": [
+                    "calc(100vw $2)"
+                ],
+                "description": ""
+            },
+            "calc100vh": {
+                "prefix": "cch;",
+                "body": [
+                    "calc(100vh $2)"
+                ],
+                "description": ""
+            },
+            "calc100%": {
+                "prefix": "cc;",
+                "body": [
+                    "calc(100% $2)"
+                ],
+                "description": ""
+            },
+            "calcvar": {
+                "prefix": "cv;",
+                "body": [
+                    "calc(var(--$1) $2)"
+                ],
+                "description": ""
+            },
+            "var": {
+                "prefix": "va;",
+                "body": [
+                    "var(--$1)"
+                ],
+                "description": ""
+            },
+            "margin-block%": {
+                "prefix": "mgb;",
+                "body": [
+                    "margin-block: $1%;"
+                ],
+                "description": ""
+            },
+            "margin-block": {
+                "prefix": "mgb;",
+                "body": [
+                    "margin-block: $1;"
+                ],
+                "description": ""
+            },
+            "padding-block%": {
+                "prefix": "pdb;",
+                "body": [
+                    "padding-block: $1%;"
+                ],
+                "description": ""
+            },
+            "padding-block": {
+                "prefix": "pdb;",
+                "body": [
+                    "padding-block: $1;"
+                ],
+                "description": ""
+            },
+            "margin-inline-auto": {
+                "prefix": "mgia;",
+                "body": [
+                    "margin-inline: auto;"
+                ],
+                "description": ""
+            },
+            "margin-inline%": {
+                "prefix": "mgi;",
+                "body": [
+                    "margin-inline: $1%;"
+                ],
+                "description": ""
+            },
+            "margin-inline": {
+                "prefix": "mgi;",
+                "body": [
+                    "margin-inline: $1px;"
+                ],
+                "description": ""
+            },
+            "padding-inline:%": {
+                "prefix": "pdi;",
+                "body": [
+                    "padding-inline: $1%;"
+                ],
+                "description": ""
+            },
+            "padding-inline:px": {
+                "prefix": "pdi;",
+                "body": [
+                    "padding-inline: $1px;"
+                ],
+                "description": ""
+            },
+            ":where(div[class*=])": {
+                "prefix": ":wdc;",
+                "body": [
+                    ":where(div[class*=\"$1\"])$2"
+                ],
+                "description": ""
+            },
+            "cparrow": {
+                "prefix": "cparrow",
+                "body": [
+                    "clip-path: polygon(",
+                    "    100% 90%,100% 0%,0% 0%,0% 90%,",
+                    "    calc(50% - 50px) 90%,",
+                    "    50% 100%,",
+                    "    calc(50% + 50px) 90%,",
+                    ");"
+                ],
+                "description": ""
+            },
+            "cp;": {
+                "prefix": "cp;",
+                "body": [
+                    "clip-path: polygon(",
+                    "    0% 0%,",
+                    "    0% 100%,",
+                    "    100% 100%,",
+                    "    100% 10%,",
+                    ");"
+                ],
+                "description": ""
+            },
+            "important": {
+                "prefix": "!",
+                "body": [
+                    "!important"
+                ],
+                "description": ""
+            },
+            "h1h2h3": {
+                "prefix": "h1;",
+                "body": [
+                    "h1,h2,h3,h4{$1}"
+                ],
+                "description": ""
+            },
+            "clip-calc": {
+                "prefix": "cpc;",
+                "body": [
+                    "clip-path: polygon($1 0% 0%,0% 100%, 100% 100%,100% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,0% 0%,calc(0% - 0px) calc(0% + 0px));"
+                ],
+                "description": ""
+            },
+            "varcalc": {
+                "prefix": "vc;",
+                "body": [
+                    "calc(var(--$1) $2)"
+                ],
+                "description": ""
+            },
+            "padding-inline": {
+                "prefix": "pdi;",
+                "body": [
+                    "padding-inline: $1;"
+                ],
+                "description": ""
+            },
+            "calc(#{": {
+                "prefix": "cc;",
+                "body": [
+                    "calc(#{$1} / $2)"
+                ],
+                "description": ""
+            },
+            "article": {
+                "prefix": "ar;",
+                "body": [
+                    "article>div{",
+                    "    $1",
+                    "}"
+                ],
+                "description": ""
+            },
+            "clamp": {
+                "prefix": "cm;",
+                "body": [
+                    "clamp($1px,$3vw,$2px)"
+                ],
+                "description": ""
+            },
+            "&:bf": {
+                "prefix": "&:be;",
+                "body": [
+                    "&:before{",
+                    "    ",
+                    "}"
+                ],
+                "description": ""
+            },
+            "absolutecenter": {
+                "prefix": "pacen",
+                "body": [
+                    "position: absolute;",
+                    "top: 50%;",
+                    "left: 50%;",
+                    "transform: translate(-50%,-50%);"
+                ]
+            }
+        }

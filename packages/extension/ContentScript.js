@@ -226,109 +226,102 @@
 
   async function onClickSend() {
     try {
-      // Geminiページかチェック
-      if (!location.host.includes('gemini.google.com')) {
-        alert('⚠️ このボタンはGeminiページでのみ動作します');
-        return;
-      }
-      
-      const data = extractThread();
-      const totalImages = (data.messages || []).reduce((sum, m) => sum + ((m.metadata?.imageUrls || []).length), 0);
-      const topicIdForName = `topic_${data.threadId}`;
-      
-      // 画像URLを収集（metadata.imageUrlsから抽出）
-      const urls = [];
-      for (const m of (data.messages || [])) {
-        const imageUrls = m.metadata?.imageUrls || [];
-        urls.push(...imageUrls);
-      }
-      console.log('[ContentScript] Extracted image URLs:', urls);
-      
-      // 画像がある場合は、タブを開いたまま待つよう警告
-      if (urls.length > 0) {
-        const proceed = confirm(
-          `画像が${urls.length}枚検出されました。\n\n` +
-          `⚠️ アップロード中は以下を守ってください：\n` +
-          `・このタブを閉じない\n` +
-          `・別のタブに切り替えない\n` +
-          `・完了まで待つ（数秒〜数十秒）\n\n` +
-          `続行しますか？`
-        );
-        if (!proceed) return;
-      }
-      
-      // 現在の送信先環境を取得
-      const settings = await new Promise(resolve => {
-        chrome.storage.sync.get(['chatKanbanApiTarget'], result => {
-          resolve(result);
-        });
-      });
-      const currentTarget = settings.chatKanbanApiTarget || 'vercel';
-      const storageKey = currentTarget === 'vercel' ? 'sentTopicsVercel' : 'sentTopicsLocalhost';
-      
-      // 既に送信済みかチェック（環境ごとに別管理）
-      const sentTopics = await new Promise(resolve => {
-        chrome.storage.local.get([storageKey], result => {
-          resolve(result[storageKey] || {});
-        });
-      });
-      
-      const previousData = sentTopics[topicIdForName];
-      let isUpdate = false;
-      
-      if (previousData) {
-        // 同じトピックIDが既に存在する場合
-        const prevCount = previousData.messageCount || 0;
-        const currentCount = (data.messages || []).length;
-        
-        if (currentCount > prevCount) {
-          isUpdate = true;
-          if (!confirm(`このトピックは既に送信済みです。\n新しいメッセージが追加されているため、上書き更新します。\n\n以前: ${prevCount}件のメッセージ\n現在: ${currentCount}件のメッセージ\n\n続行しますか？`)) {
-            return;
-          }
-        } else {
-          if (!confirm(`このトピックは既に送信済みです (${currentTarget})。\n\n再送信しますか？`)) {
-            return;
-          }
-        }
-      }
-      
-      const resp = await chrome.runtime.sendMessage({ type:'CK_IMPORT', data, urls, topicIdForName });
-      
-      if (resp?.ok) {
-        // 送信成功したら記録（環境ごとに別管理）
-        sentTopics[topicIdForName] = {
-          messageCount: (data.messages || []).length,
-          sentAt: new Date().toISOString(),
-          title: data.title || data.chatTitle
-        };
-        const updateObj = {};
-        updateObj[storageKey] = sentTopics;
-        chrome.storage.local.set(updateObj);
-        
-        const targetLabel = currentTarget === 'vercel' ? 'Vercel' : 'Localhost';
-        const uploadedImages = resp.uploadedImages || 0;
-        const totalImages = resp.totalImages || 0;
-        
-        let imageMsg = '';
-        if (totalImages > 0) {
-          if (uploadedImages === totalImages) {
-            imageMsg = `\n画像: ${uploadedImages}枚アップロード成功`;
-          } else if (uploadedImages === 0) {
-            imageMsg = `\n⚠️ 画像: ${totalImages}枚すべて失敗（4MB超過または取得エラー）`;
-          } else {
-            imageMsg = `\n⚠️ 画像: ${uploadedImages}/${totalImages}枚成功（${totalImages - uploadedImages}枚失敗）`;
-          }
-        }
-        
-        const msg = isUpdate 
-          ? `トピックを更新しました！(${targetLabel})\n${resp.result?.topicId || ''}${imageMsg}`
-          : `送信完了！(${targetLabel})\n${resp.result?.topicId || ''}${imageMsg}`;
-        alert(msg);
-      } else {
-        alert(`Send failed: ${resp?.error || resp?.status || 'unknown'}`);
-      }
-    } catch(e){ alert(`Send failed: ${e?.message||e}`); }
+		const data = extractThread();
+		const totalImages = (data.messages || []).reduce(
+			(sum, m) => sum + (m.metadata?.imageUrls || []).length,
+			0
+		);
+		const topicIdForName = `topic_${data.threadId}`;
+
+		// 画像URLを収集（metadata.imageUrlsから抽出）
+		const urls = [];
+		for (const m of data.messages || []) {
+			const imageUrls = m.metadata?.imageUrls || [];
+			urls.push(...imageUrls);
+		}
+		console.log("[ContentScript] Extracted image URLs:", urls);
+
+		// 現在の送信先環境を取得
+		const settings = await new Promise((resolve) => {
+			chrome.storage.sync.get(["chatKanbanApiTarget"], (result) => {
+				resolve(result);
+			});
+		});
+		const currentTarget = settings.chatKanbanApiTarget || "vercel";
+		const storageKey =
+			currentTarget === "vercel"
+				? "sentTopicsVercel"
+				: "sentTopicsLocalhost";
+
+		// 既に送信済みかチェック（環境ごとに別管理）
+		const sentTopics = await new Promise((resolve) => {
+			chrome.storage.local.get([storageKey], (result) => {
+				resolve(result[storageKey] || {});
+			});
+		});
+
+		const previousData = sentTopics[topicIdForName];
+		let isUpdate = false;
+
+		if (previousData) {
+			// 同じトピックIDが既に存在する場合
+			const prevCount = previousData.messageCount || 0;
+			const currentCount = (data.messages || []).length;
+
+			if (currentCount > prevCount) {
+				isUpdate = true;
+				if (
+					!confirm(
+						`このトピックは既に送信済みです。\n新しいメッセージが追加されているため、上書き更新します。\n\n以前: ${prevCount}件のメッセージ\n現在: ${currentCount}件のメッセージ\n\n続行しますか？`
+					)
+				) {
+					return;
+				}
+			} else {
+				if (
+					!confirm(
+						`このトピックは既に送信済みです (${currentTarget})。\n\n再送信しますか？`
+					)
+				) {
+					return;
+				}
+			}
+		}
+
+		const resp = await chrome.runtime.sendMessage({
+			type: "CK_IMPORT",
+			data,
+			urls,
+			topicIdForName,
+		});
+
+		if (resp?.ok) {
+			// 送信成功したら記録（環境ごとに別管理）
+			sentTopics[topicIdForName] = {
+				messageCount: (data.messages || []).length,
+				sentAt: new Date().toISOString(),
+				title: data.title || data.chatTitle,
+			};
+			const updateObj = {};
+			updateObj[storageKey] = sentTopics;
+			chrome.storage.local.set(updateObj);
+
+			const targetLabel =
+				currentTarget === "vercel" ? "Vercel" : "Localhost";
+			const msg = isUpdate
+				? `トピックを更新しました！(${targetLabel})\n${
+						resp.result?.topicId || ""
+				  }\n画像: ${totalImages}枚`
+				: `送信完了！(${targetLabel})\n${
+						resp.result?.topicId || ""
+				  }\n画像: ${totalImages}枚`;
+			alert(msg);
+		} else {
+			alert(`Send failed: ${resp?.error || resp?.status || "unknown"}`);
+		}
+	} catch (e) {
+		alert(`Send failed: ${e?.message || e}`);
+	}
   }
 
   const observer = new MutationObserver(()=>createButton());
