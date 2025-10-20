@@ -70,51 +70,124 @@ export default function Page() {
       initialMode="left"
       sidebarContent={
         <>
-          <div className="text-center mb-4">
+          <div className="text-center mb-2">
             <h2 className="text-lg font-bold" style={{ color: 'var(--mc)' }}>
               Chat Kanban
             </h2>
             <p className="text-xs mt-1 opacity-70">ナビゲーション</p>
           </div>
           
-          <div className="controls">
-            <button className="control_btn txwh">設定</button>
+          <div className="controls flex gap-2">
             <DarkModeToggle />
-          </div>
-
-          <div className="controls">
             <Button
               size="sm"
-              variant="outline"
               onClick={fetchTopics}
               disabled={loading}
-              className="flex items-center gap-2"
+              className="flex-1 flex items-center justify-center gap-1"
+              style={{ backgroundColor: 'var(--mc)', color: 'white' }}
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              更新
             </Button>
             <Button
               size="sm"
-              variant="outline"
               onClick={exportJSON}
-              className="flex items-center gap-2"
+              className="flex-1 flex items-center justify-center gap-1"
+              style={{ backgroundColor: 'var(--ac)', color: 'white' }}
             >
               <Download className="w-4 h-4" />
-              JSONエクスポート
             </Button>
           </div>
 
-          <nav className="navigation flex lg:flex-col">
-            <a href="#" className="no-underline font-medium hover:translate-x-1">
-              ホーム
+          {/* 検索ボックス */}
+          <div className="search-box mt-2">
+            <input
+              type="text"
+              placeholder="🔍 メッセージを検索..."
+              className="w-full px-3 py-2 rounded-lg text-sm transition"
+              style={{
+                backgroundColor: 'var(--bc)',
+                color: 'var(--tx)',
+                border: '1px solid var(--borderColor)',
+                outline: 'none'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'var(--mc)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = 'var(--borderColor)';
+              }}
+              onChange={(e) => {
+                // TODO: 検索機能の実装
+                console.log('Search query:', e.target.value);
+              }}
+              aria-label="メッセージ検索"
+            />
+          </div>
+
+          <nav className="navigation flex flex-col gap-2 mt-4">
+            <a 
+              href="#" 
+              className="px-4 py-2 rounded-lg transition font-medium no-underline"
+              style={{ 
+                backgroundColor: 'transparent',
+                border: '1px solid var(--borderColor)',
+                color: 'var(--tx)'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--mc)';
+                e.currentTarget.style.color = 'var(--wh)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--tx)';
+              }}
+            >
+              🏠 ホーム
             </a>
-            <a href="#" className="no-underline font-medium hover:translate-x-1">
-              フィルター
+            <a 
+              href="#" 
+              className="px-4 py-2 rounded-lg transition font-medium no-underline"
+              style={{ 
+                backgroundColor: 'transparent',
+                border: '1px solid var(--borderColor)',
+                color: 'var(--tx)'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--mc)';
+                e.currentTarget.style.color = 'var(--wh)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--tx)';
+              }}
+            >
+              🔍 フィルター
             </a>
-            <a href="#" className="no-underline font-medium hover:translate-x-1">
-              統計
+            <a 
+              href="#" 
+              className="px-4 py-2 rounded-lg transition font-medium no-underline"
+              style={{ 
+                backgroundColor: 'transparent',
+                border: '1px solid var(--borderColor)',
+                color: 'var(--tx)'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--mc)';
+                e.currentTarget.style.color = 'var(--wh)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--tx)';
+              }}
+            >
+              📊 統計
             </a>
           </nav>
+
+          <div className="mt-auto pt-4 border-t text-xs text-center opacity-60" style={{ borderColor: 'var(--borderColor)' }}>
+            <p>💡 このパネルは</p>
+            <p>ドラッグで移動できます</p>
+          </div>
         </>
       }
     >
