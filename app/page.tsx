@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { KanbanCard } from '@/components/KanbanCard';
 import { DraggableSidebar } from '@/components/DraggableSidebar';
 import type { Topic } from '@/packages/shared/Types';
-import { Download, RefreshCw, Loader2, Send, Moon, Sun, Bot } from 'lucide-react';
+import { Download, RefreshCw, Loader2, Send, Moon, Sun, MessageCircleMore } from 'lucide-react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 type ViewMode = 'default' | 'preview';
@@ -179,6 +179,18 @@ export default function Page() {
       compact={true}
       sidebarContent={
         <div className="sidebar-compact">
+          {/* タイトル */}
+          <div style={{ 
+            textAlign: 'center', 
+            fontSize: '0.75rem',
+            fontWeight: 'bold',
+            color: 'var(--mc)',
+            lineHeight: '1.2',
+            marginBottom: '0.5rem'
+          }}>
+            chat<br />kanban
+          </div>
+
           {/* ダークモードトグル */}
           <button
             onClick={toggleDarkMode}
@@ -221,7 +233,7 @@ export default function Page() {
             onClick={() => setIsAiChatOpen(true)}
             className="icon-button"
           >
-            <Bot className="w-5 h-5" />
+            <MessageCircleMore className="w-5 h-5" />
           </button>
         </div>
       }
@@ -262,38 +274,40 @@ export default function Page() {
         ) : (
           // プレビューモード：一覧 + プレビュー
           <div className="preview-layout">
-            <PanelGroup direction="horizontal" style={{ height: '100%' }}>
+            <PanelGroup direction="horizontal" style={{ height: '100vh' }}>
               {/* 一覧ペイン */}
               <Panel defaultSize={30} minSize={20}>
-                <div className="topic-list-pane">
+                <div style={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  borderRight: 'var(--line)'
+                }}>
                   <h3 style={{ 
                     color: 'var(--tx)', 
-                    marginBottom: '1rem',
+                    padding: 'var(--inline)',
+                    margin: 0,
                     fontSize: '0.875rem',
-                    opacity: 0.7
+                    opacity: 0.7,
+                    borderBottom: 'var(--line)'
                   }}>
                     他のトピック
                   </h3>
-                  <div>
+                  <div style={{ 
+                    flex: 1,
+                    overflowY: 'auto',
+                    padding: 'var(--inline)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--gap)'
+                  }}>
                     {listTopics.map((topic) => (
                       <div 
                         key={topic.id} 
                         onClick={() => setPreviewTopicId(topic.id)}
-                        className="topic-list-item"
+                        style={{ cursor: 'pointer' }}
                       >
-                        <div style={{ 
-                          fontSize: '0.875rem',
-                          fontWeight: '500'
-                        }}>
-                          {topic.chatTitle || topic.title}
-                        </div>
-                        <div style={{ 
-                          fontSize: '0.75rem',
-                          opacity: 0.6,
-                          marginTop: '0.25rem'
-                        }}>
-                          {new Date(topic.createdAt).toLocaleDateString('ja-JP')}
-                        </div>
+                        <KanbanCard topic={topic} />
                       </div>
                     ))}
                   </div>
@@ -309,40 +323,49 @@ export default function Page() {
 
               {/* プレビューペイン */}
               <Panel defaultSize={70} minSize={40}>
-                <div className="preview-pane">
-                  {previewTopic ? (
-                    <>
-                      <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        marginBottom: '1rem'
-                      }}>
-                        <h2 style={{ color: 'var(--tx)', fontSize: '1.25rem' }}>
-                          {previewTopic.chatTitle || previewTopic.title}
-                        </h2>
-                        <button
-                          onClick={closePreview}
-                          style={{
-                            background: 'none',
-                            border: '1px solid var(--borderColor)',
-                            borderRadius: '0.375rem',
-                            padding: '0.5rem 1rem',
-                            cursor: 'pointer',
-                            color: 'var(--tx)',
-                            fontSize: '0.875rem'
-                          }}
-                        >
-                          ✕ 閉じる
-                        </button>
-                      </div>
+                <div style={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column'
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    padding: 'var(--inline)',
+                    borderBottom: 'var(--line)'
+                  }}>
+                    <h2 style={{ color: 'var(--tx)', fontSize: '1.25rem', margin: 0 }}>
+                      {previewTopic ? (previewTopic.chatTitle || previewTopic.title) : 'プレビュー'}
+                    </h2>
+                    <button
+                      onClick={closePreview}
+                      style={{
+                        background: 'none',
+                        border: '1px solid var(--borderColor)',
+                        borderRadius: 'var(--rad)',
+                        padding: '0.5rem 1rem',
+                        cursor: 'pointer',
+                        color: 'var(--tx)',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      ✕ 閉じる
+                    </button>
+                  </div>
+                  <div style={{ 
+                    flex: 1,
+                    overflowY: 'auto',
+                    padding: 'var(--inline)'
+                  }}>
+                    {previewTopic ? (
                       <KanbanCard topic={previewTopic} />
-                    </>
-                  ) : (
-                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--tx)' }}>
-                      トピックが見つかりません
-                    </div>
-                  )}
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--tx)' }}>
+                        トピックが見つかりません
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Panel>
             </PanelGroup>

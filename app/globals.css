@@ -116,7 +116,7 @@
     
     /* コンパクトサイドバーモード */
     .draggable-layout.compact-sidebar {
-      --navW: 60px;
+      --navW: 120px;
     }
   }
 
@@ -170,7 +170,7 @@
 
   /* センターモード時のコンテンツ調整 */
   .app_container.center .content_section {
-    width: calc(50% - var(--navW) / 2  - var(--inline));
+    width: calc(100%);
     
   }
 
@@ -191,9 +191,7 @@
     transition: all var(--tr) ease;
   }
 
-  .content_section:is(.center *) {
-    width: calc(50% - var(--navW) / 2 - var(--inline));
-  }
+
 
   .content_section h1 {
     color: var(--mc);
@@ -383,7 +381,9 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--gap);
-    padding: var(--inline);
+}
+.two-column-grid:is(.center *){
+          gap: calc( var(--navW) + var(--inline)*2 );
   }
 
   .column {
