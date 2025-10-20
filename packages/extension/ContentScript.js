@@ -288,9 +288,23 @@
         chrome.storage.local.set(updateObj);
         
         const targetLabel = currentTarget === 'vercel' ? 'Vercel' : 'Localhost';
+        const uploadedImages = resp.uploadedImages || 0;
+        const totalImages = resp.totalImages || 0;
+        
+        let imageMsg = '';
+        if (totalImages > 0) {
+          if (uploadedImages === totalImages) {
+            imageMsg = `\n画像: ${uploadedImages}枚アップロード成功`;
+          } else if (uploadedImages === 0) {
+            imageMsg = `\n⚠️ 画像: ${totalImages}枚すべて失敗（4MB超過または取得エラー）`;
+          } else {
+            imageMsg = `\n⚠️ 画像: ${uploadedImages}/${totalImages}枚成功（${totalImages - uploadedImages}枚失敗）`;
+          }
+        }
+        
         const msg = isUpdate 
-          ? `トピックを更新しました！(${targetLabel})\n${resp.result?.topicId || ''}\n画像: ${totalImages}枚`
-          : `送信完了！(${targetLabel})\n${resp.result?.topicId || ''}\n画像: ${totalImages}枚`;
+          ? `トピックを更新しました！(${targetLabel})\n${resp.result?.topicId || ''}${imageMsg}`
+          : `送信完了！(${targetLabel})\n${resp.result?.topicId || ''}${imageMsg}`;
         alert(msg);
       } else {
         alert(`Send failed: ${resp?.error || resp?.status || 'unknown'}`);

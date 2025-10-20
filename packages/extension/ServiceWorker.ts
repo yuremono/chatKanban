@@ -109,7 +109,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           body: JSON.stringify(data),
         });
         const json = await res.json().catch(() => ({}));
-        sendResponse({ ok: res.ok, result: json, status: res.status });
+        sendResponse({ 
+          ok: res.ok, 
+          result: json, 
+          status: res.status,
+          uploadedImages: uploaded.length,
+          totalImages: (urls || []).length
+        });
       } catch (e: any) {
         sendResponse({ ok: false, error: e?.message || String(e) });
       }
