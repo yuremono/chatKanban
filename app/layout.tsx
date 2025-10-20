@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import 'line-awesome/dist/line-awesome/css/line-awesome.min.css';
 
 export const metadata: Metadata = {
   title: 'Chat Kanban',

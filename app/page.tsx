@@ -6,7 +6,7 @@ import { KanbanCard } from '@/components/KanbanCard';
 import { DraggableSidebar } from '@/components/DraggableSidebar';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import type { Topic } from '@/packages/shared/Types';
-import { Download, RefreshCw, Loader2, Search, Send, Moon, Home, Filter, BarChart3 } from 'lucide-react';
+import { Download, RefreshCw, Loader2, Send, Moon, Home, Filter, BarChart3 } from 'lucide-react';
 
 export default function Page() {
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -192,9 +192,13 @@ export default function Page() {
               }}
               aria-label="メッセージ検索"
             />
-            <Search 
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" 
-              style={{ color: 'var(--tx)', opacity: 0.5 }}
+            <i 
+              className="las la-search absolute right-3 top-1/2 -translate-y-1/2"
+              style={{ 
+                color: 'var(--tx)', 
+                opacity: 0.5,
+                fontSize: '1.2rem'
+              }}
             />
           </div>
           
