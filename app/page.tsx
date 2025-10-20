@@ -6,11 +6,17 @@ import { KanbanCard } from '@/components/KanbanCard';
 import { DraggableSidebar } from '@/components/DraggableSidebar';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
 import type { Topic } from '@/packages/shared/Types';
-import { Download, RefreshCw, Loader2 } from 'lucide-react';
+import { Download, RefreshCw, Loader2, Search, Send, Moon, Home, Filter, BarChart3 } from 'lucide-react';
 
 export default function Page() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [aiMessage, setAiMessage] = useState('');
+  const [aiChatHistory, setAiChatHistory] = useState<Array<{role: string, content: string}>>([]);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const fetchTopics = async () => {
     setLoading(true);
@@ -61,9 +67,67 @@ export default function Page() {
     }
   };
 
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setSearching(true);
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setSearchResults(data.results || []);
+    } catch (err) {
+      console.error('Search failed:', err);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleAiChat = async () => {
+    if (!aiMessage.trim() || aiLoading) return;
+
+    const userMessage = aiMessage;
+    setAiMessage('');
+    setAiLoading(true);
+
+    const newHistory = [...aiChatHistory, { role: 'user', content: userMessage }];
+    setAiChatHistory(newHistory);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage, history: aiChatHistory })
+      });
+      const data = await res.json();
+      
+      if (data.reply) {
+        setAiChatHistory([...newHistory, { role: 'assistant', content: data.reply }]);
+      } else {
+        alert('AIチャットに失敗しました: ' + (data.error || '不明なエラー'));
+      }
+    } catch (err) {
+      console.error('AI chat failed:', err);
+      alert('AIチャットに失敗しました');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchTopics();
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        handleSearch(searchQuery);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   return (
     <DraggableSidebar 
@@ -78,7 +142,15 @@ export default function Page() {
           </div>
           
           <div className="controls flex gap-2">
-            <DarkModeToggle />
+            <Button
+              size="sm"
+              onClick={() => document.documentElement.setAttribute('data-theme', 
+                document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')}
+              className="flex-1 flex items-center justify-center gap-1"
+              style={{ backgroundColor: 'var(--bc)', color: 'var(--tx)' }}
+            >
+              <Moon className="w-4 h-4" />
+            </Button>
             <Button
               size="sm"
               onClick={fetchTopics}
@@ -99,11 +171,13 @@ export default function Page() {
           </div>
 
           {/* 検索ボックス */}
-          <div className="search-box mt-2">
+          <div className="search-box mt-2 relative">
             <input
               type="text"
-              placeholder="🔍 メッセージを検索..."
-              className="w-full px-3 py-2 rounded-lg text-sm transition"
+              placeholder="メッセージを検索..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-2 pr-10 rounded-lg text-sm transition"
               style={{
                 backgroundColor: 'var(--bc)',
                 color: 'var(--tx)',
@@ -116,18 +190,30 @@ export default function Page() {
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = 'var(--borderColor)';
               }}
-              onChange={(e) => {
-                // TODO: 検索機能の実装
-                console.log('Search query:', e.target.value);
-              }}
               aria-label="メッセージ検索"
             />
+            <Search 
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4" 
+              style={{ color: 'var(--tx)', opacity: 0.5 }}
+            />
           </div>
+          
+          {/* 検索結果表示 */}
+          {searching && (
+            <div className="text-xs text-center py-2" style={{ color: 'var(--tx)' }}>
+              検索中...
+            </div>
+          )}
+          {searchResults.length > 0 && (
+            <div className="text-xs py-2" style={{ color: 'var(--tx)' }}>
+              {searchResults.length}件の結果
+            </div>
+          )}
 
-          <nav className="navigation flex flex-col gap-2 mt-4">
+          <nav className="navigation flex flex-col gap-2 mt-2">
             <a 
               href="#" 
-              className="px-4 py-2 rounded-lg transition font-medium no-underline"
+              className="px-4 py-2 rounded-lg transition font-medium no-underline flex items-center gap-2"
               style={{ 
                 backgroundColor: 'transparent',
                 border: '1px solid var(--borderColor)',
@@ -142,11 +228,11 @@ export default function Page() {
                 e.currentTarget.style.color = 'var(--tx)';
               }}
             >
-              🏠 ホーム
+              <Home className="w-4 h-4" /> ホーム
             </a>
             <a 
               href="#" 
-              className="px-4 py-2 rounded-lg transition font-medium no-underline"
+              className="px-4 py-2 rounded-lg transition font-medium no-underline flex items-center gap-2"
               style={{ 
                 backgroundColor: 'transparent',
                 border: '1px solid var(--borderColor)',
@@ -161,11 +247,11 @@ export default function Page() {
                 e.currentTarget.style.color = 'var(--tx)';
               }}
             >
-              🔍 フィルター
+              <Filter className="w-4 h-4" /> フィルター
             </a>
             <a 
               href="#" 
-              className="px-4 py-2 rounded-lg transition font-medium no-underline"
+              className="px-4 py-2 rounded-lg transition font-medium no-underline flex items-center gap-2"
               style={{ 
                 backgroundColor: 'transparent',
                 border: '1px solid var(--borderColor)',
@@ -180,9 +266,91 @@ export default function Page() {
                 e.currentTarget.style.color = 'var(--tx)';
               }}
             >
-              📊 統計
+              <BarChart3 className="w-4 h-4" /> 統計
             </a>
           </nav>
+
+          {/* AIチャットボックス */}
+          <div className="ai-chat-box mt-4 flex-1 flex flex-col">
+            <div className="text-xs font-medium mb-2" style={{ color: 'var(--tx)' }}>
+              AIアシスタント
+            </div>
+            <div 
+              className="chat-history flex-1 overflow-y-auto mb-2 p-2 rounded-lg text-xs"
+              style={{
+                backgroundColor: 'var(--bc)',
+                border: '1px solid var(--borderColor)',
+                maxHeight: '200px',
+                minHeight: '100px'
+              }}
+            >
+              {aiChatHistory.length === 0 ? (
+                <div className="text-center opacity-50" style={{ color: 'var(--tx)' }}>
+                  AIに質問してみましょう
+                </div>
+              ) : (
+                aiChatHistory.map((msg, idx) => (
+                  <div 
+                    key={idx} 
+                    className="mb-2"
+                    style={{ 
+                      color: msg.role === 'user' ? 'var(--mc)' : 'var(--tx)',
+                      fontWeight: msg.role === 'user' ? 'bold' : 'normal'
+                    }}
+                  >
+                    <div className="text-xs opacity-70">
+                      {msg.role === 'user' ? 'あなた' : 'AI'}:
+                    </div>
+                    <div>{msg.content}</div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="AIに質問..."
+                value={aiMessage}
+                onChange={(e) => setAiMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAiChat();
+                  }
+                }}
+                disabled={aiLoading}
+                className="w-full px-3 py-2 pr-10 rounded-lg text-sm transition"
+                style={{
+                  backgroundColor: 'var(--bc)',
+                  color: 'var(--tx)',
+                  border: '1px solid var(--borderColor)',
+                  outline: 'none'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--mc)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--borderColor)';
+                }}
+              />
+              <button
+                onClick={handleAiChat}
+                disabled={aiLoading || !aiMessage.trim()}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded transition"
+                style={{
+                  backgroundColor: aiLoading || !aiMessage.trim() ? 'transparent' : 'var(--mc)',
+                  color: 'white',
+                  opacity: aiLoading || !aiMessage.trim() ? 0.3 : 1
+                }}
+              >
+                {aiLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
 
           <div className="mt-auto pt-4 border-t text-xs text-center opacity-60" style={{ borderColor: 'var(--borderColor)' }}>
             <p>💡 このパネルは</p>
