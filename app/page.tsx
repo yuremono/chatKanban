@@ -15,6 +15,7 @@ export default function Page() {
   const [viewMode, setViewMode] = useState<ViewMode>('default');
   const [previewTopicId, setPreviewTopicId] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
+  const [previewPanelSizes, setPreviewPanelSizes] = useState<number[]>([30, 70]);
   
   // モーダル状態
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -171,7 +172,24 @@ export default function Page() {
 
   useEffect(() => {
     fetchTopics();
+    // リサイザー位置をlocalStorageから読み込み
+    const saved = localStorage.getItem('previewPanelSizes');
+    if (saved) {
+      try {
+        const sizes = JSON.parse(saved);
+        if (Array.isArray(sizes) && sizes.length === 2) {
+          setPreviewPanelSizes(sizes);
+        }
+      } catch (e) {
+        console.error('Failed to parse saved panel sizes:', e);
+      }
+    }
   }, []);
+
+  const handlePanelResize = (sizes: number[]) => {
+    setPreviewPanelSizes(sizes);
+    localStorage.setItem('previewPanelSizes', JSON.stringify(sizes));
+  };
 
   return (
     <DraggableSidebar 
@@ -256,27 +274,27 @@ export default function Page() {
             {/* 左カラム */}
             <div className="column">
               {leftColumn.map((topic) => (
-                <div key={topic.id} onClick={() => openPreview(topic.id)} style={{ cursor: 'pointer' }}>
-                  <KanbanCard topic={topic} />
-                </div>
+                <KanbanCard key={topic.id} topic={topic} onPreview={openPreview} />
               ))}
             </div>
 
             {/* 右カラム */}
             <div className="column">
               {rightColumn.map((topic) => (
-                <div key={topic.id} onClick={() => openPreview(topic.id)} style={{ cursor: 'pointer' }}>
-                  <KanbanCard topic={topic} />
-                </div>
+                <KanbanCard key={topic.id} topic={topic} onPreview={openPreview} />
               ))}
             </div>
           </div>
         ) : (
           // プレビューモード：一覧 + プレビュー
           <div className="preview-layout">
-            <PanelGroup direction="horizontal" style={{ height: '100vh' }}>
+            <PanelGroup 
+              direction="horizontal" 
+              style={{ height: '100vh' }}
+              onLayout={handlePanelResize}
+            >
               {/* 一覧ペイン */}
-              <Panel defaultSize={30} minSize={20}>
+              <Panel defaultSize={previewPanelSizes[0]} minSize={20}>
                 <div style={{ 
                   height: '100%', 
                   display: 'flex', 
@@ -302,13 +320,11 @@ export default function Page() {
                     gap: 'var(--gap)'
                   }}>
                     {listTopics.map((topic) => (
-                      <div 
+                      <KanbanCard 
                         key={topic.id} 
-                        onClick={() => setPreviewTopicId(topic.id)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <KanbanCard topic={topic} />
-                      </div>
+                        topic={topic} 
+                        onPreview={(id) => setPreviewTopicId(id)}
+                      />
                     ))}
                   </div>
                 </div>
@@ -322,7 +338,7 @@ export default function Page() {
               }} />
 
               {/* プレビューペイン */}
-              <Panel defaultSize={70} minSize={40}>
+              <Panel defaultSize={previewPanelSizes[1]} minSize={40}>
                 <div style={{ 
                   height: '100%', 
                   display: 'flex', 

@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
-import { ExternalLink, Copy, Check, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import { ExternalLink, Copy, Check, ChevronDown, ChevronRight, Loader2, Eye } from 'lucide-react';
 import type { Topic, Rally, Message } from '@/packages/shared/Types';
 
 interface KanbanCardProps {
   topic: Topic;
   onEdit?: (topic: Topic) => void;
   onDelete?: (topic: Topic) => void;
+  onPreview?: (topicId: string) => void;
 }
 
 // ---- helpers (module-scope) ----
@@ -63,12 +64,13 @@ function ImageLinkRow({ src }: { src: string }) {
   );
 }
 
-export function KanbanCard({ topic }: KanbanCardProps) {
-  const [open, setOpen] = useState(true);
+export function KanbanCard({ topic, onPreview }: KanbanCardProps) {
+  const [open, setOpen] = useState(false);
   const [rallies, setRallies] = useState<Rally[]>([]);
   const [ralliesOpen, setRalliesOpen] = useState<Record<string, boolean>>({});
   const [messagesByRally, setMessagesByRally] = useState<Record<string, Message[]>>({});
   const [loadingRallies, setLoadingRallies] = useState<Record<string, boolean>>({});
+  const [expandedRallies, setExpandedRallies] = useState<Record<string, boolean>>({});
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ja-JP', {
@@ -97,6 +99,10 @@ export function KanbanCard({ topic }: KanbanCardProps) {
     }
   };
 
+  const toggleRallyExpand = (rallyId: string) => {
+    setExpandedRallies((prev) => ({ ...prev, [rallyId]: !prev[rallyId] }));
+  };
+
   useEffect(() => {
     if (open && rallies.length === 0) {
       fetch(`/api/rallies?topicId=${encodeURIComponent(topic.id)}`, { cache: 'no-store' })
@@ -111,11 +117,21 @@ export function KanbanCard({ topic }: KanbanCardProps) {
     <section className="content_section  shadow-sm overflow-hidden">
       {/* トピックヘッダー */}
       <div
-        className="topic_header cursor-pointer transition-colors p-6 flex items-start justify-between gap-6"
+        className="topic_header transition-colors p-6 flex items-start justify-between gap-6"
         onClick={() => setOpen(!open)}
+        style={{ cursor: 'pointer' }}
       >
         <div className="flex-1 min-w-0">
-          <h2 className="topic_title  font-medium leading-tight mb-0">
+          <h2 
+            className="topic_title  font-medium leading-tight mb-0"
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              if (onPreview) {
+                onPreview(topic.id);
+              }
+            }}
+            style={{ cursor: 'pointer' }}
+          >
             {topic.chatTitle || topic.title}
           </h2>
           <div className="topic_meta mt-3 flex items-center gap-4  flex-wrap">
@@ -124,12 +140,24 @@ export function KanbanCard({ topic }: KanbanCardProps) {
             <span>{formatDate(topic.createdAt)}</span>
           </div>
         </div>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Badge variant="outline" className="text-xs px-2 py-0.5" style={{ backgroundColor: 'var(--bc)', color: 'var(--tx)', borderColor: 'var(--borderColor)' }}>
-            {topic.visibility === 'public' ? '公開' : topic.visibility === 'unlisted' ? '限定公開' : '非公開'}
-          </Badge>
-          {open ? <ChevronDown className="w-5 h-5" style={{ color: 'var(--tx)' }} /> : <ChevronRight className="w-5 h-5" style={{ color: 'var(--tx)' }} />}
-        </div>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onPreview) {
+              onPreview(topic.id);
+            }
+          }}
+          className="flex items-center gap-2 flex-shrink-0 p-2 rounded transition-colors"
+          style={{ border: '1px solid var(--borderColor)' }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--bc)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          <Eye className="w-4 h-4" style={{ color: 'var(--tx)' }} />
+        </button>
       </div>
 
       {/* ラリー一覧 */}
@@ -165,7 +193,13 @@ export function KanbanCard({ topic }: KanbanCardProps) {
                           <Loader2 className="w-8 h-8 mb-3 animate-spin" style={{ color: 'var(--mc)' }} />
                           <p className="text-sm" style={{ color: 'var(--tx)' }}>Loading...</p>
                         </div>
-                      ) : (messagesByRally[rally.id] || []).map((m, idx) => (
+                      ) : (messagesByRally[rally.id] || []).map((m, idx) => {
+                        const isExpanded = expandedRallies[rally.id];
+                        const lines = m.content.split('\n');
+                        const shouldTruncate = lines.length > 3 && !isExpanded;
+                        const displayContent = shouldTruncate ? lines.slice(0, 3).join('\n') + '...' : m.content;
+
+                        return (
                         <div
                           key={idx}
                           className={`flex gap-4 mb-4 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -176,9 +210,11 @@ export function KanbanCard({ topic }: KanbanCardProps) {
                                 ? 'message_user rounded-[1em_0_1em_1em]'
                                 : 'message_assistant rounded-[0_1em_1em_1em]'
                             }`}
+                            onClick={() => shouldTruncate && toggleRallyExpand(rally.id)}
+                            style={{ cursor: shouldTruncate ? 'pointer' : 'default' }}
                           >
                             <div className="whitespace-pre-wrap break-words leading-[1.6]">
-                              {m.content}
+                              {displayContent}
                             </div>
 
                             {/* 画像リンク */}
@@ -213,7 +249,8 @@ export function KanbanCard({ topic }: KanbanCardProps) {
                               )}
                           </div>
                         </div>
-                      ))}
+                      );
+                      })}
                     </div>
                   )}
                 </div>
