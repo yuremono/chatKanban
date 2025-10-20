@@ -197,6 +197,7 @@ export default function Page() {
       initialMode="left"
       compact={true}
       onModeChange={setSidebarMode}
+      hideSidebar={viewMode === 'preview' && sidebarMode === 'center'}
       sidebarContent={
         <div className="sidebar-compact">
           {/* タイトル */}
@@ -315,18 +316,21 @@ export default function Page() {
                   <div style={{ 
                     flex: 1,
                     overflowY: 'auto',
-                    padding: 'var(--inline)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 'var(--gap)'
+                    padding: 'var(--inline)'
                   }}>
-                    {listTopics.map((topic) => (
-                      <KanbanCard 
-                        key={topic.id} 
-                        topic={topic} 
-                        onPreview={(id) => setPreviewTopicId(id)}
-                      />
-                    ))}
+                    <div style={{ 
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 'var(--gap)'
+                    }}>
+                      {listTopics.map((topic) => (
+                        <KanbanCard 
+                          key={topic.id} 
+                          topic={topic} 
+                          onPreview={(id) => setPreviewTopicId(id)}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </Panel>
@@ -342,7 +346,8 @@ export default function Page() {
                   cursor: 'col-resize',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  transition: 'background-color 0.3s ease'
                 }}>
                   <div className="sidebar-compact">
                     {/* タイトル */}
@@ -483,18 +488,21 @@ export default function Page() {
                   <div style={{ 
                     flex: 1,
                     overflowY: 'auto',
-                    padding: 'var(--inline)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 'var(--gap)'
+                    padding: 'var(--inline)'
                   }}>
-                    {listTopics.map((topic) => (
-                      <KanbanCard 
-                        key={topic.id} 
-                        topic={topic} 
-                        onPreview={(id) => setPreviewTopicId(id)}
-                      />
-                    ))}
+                    <div style={{ 
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 'var(--gap)'
+                    }}>
+                      {listTopics.map((topic) => (
+                        <KanbanCard 
+                          key={topic.id} 
+                          topic={topic} 
+                          onPreview={(id) => setPreviewTopicId(id)}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </Panel>

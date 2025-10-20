@@ -10,9 +10,10 @@ interface DraggableSidebarProps {
   initialMode?: LayoutMode;
   compact?: boolean;
   onModeChange?: (mode: LayoutMode) => void;
+  hideSidebar?: boolean;
 }
 
-export function DraggableSidebar({ children, sidebarContent, initialMode = 'left', compact = false, onModeChange }: DraggableSidebarProps) {
+export function DraggableSidebar({ children, sidebarContent, initialMode = 'left', compact = false, onModeChange, hideSidebar = false }: DraggableSidebarProps) {
   const [currentMode, setCurrentMode] = useState<LayoutMode>(initialMode);
   const [isDragging, setIsDragging] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -164,13 +165,18 @@ export function DraggableSidebar({ children, sidebarContent, initialMode = 'left
 			ref={containerRef}
 			className={`draggable-layout app_container ${currentMode} ${compact ? 'compact-sidebar' : ''}`}
 		>
-			{/* ドラッグ可能なサイドバー */}
-			<aside
-				ref={navRef}
-				className={`nav_section ${currentMode}`}
-				role="complementary"
-				aria-label="ドラッグ可能なサイドバーナビゲーション"
-			>
+		{/* ドラッグ可能なサイドバー */}
+		<aside
+			ref={navRef}
+			className={`nav_section ${currentMode}`}
+			role="complementary"
+			aria-label="ドラッグ可能なサイドバーナビゲーション"
+			style={{ 
+				opacity: hideSidebar ? 0 : 1,
+				pointerEvents: hideSidebar ? 'none' : 'auto',
+				transition: 'opacity 0.3s ease'
+			}}
+		>
 				{/* <div className="drag_area"></div> */}
 				<div
 					className="nav_window"
