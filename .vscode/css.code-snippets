@@ -1,0 +1,63 @@
+{
+  "CSS Variable": {
+    "prefix": "var",
+    "body": ["var(--$1)$0"],
+    "description": "CSS custom property (variable)"
+  },
+  "CSS Calc with Variable": {
+    "prefix": "calcvar",
+    "body": ["calc($1 - var(--$2))$0"],
+    "description": "CSS calc with variable"
+  },
+  "Inline Padding Variable": {
+    "prefix": "inline",
+    "body": ["var(--inline)"],
+    "description": "Inline padding variable"
+  },
+  "Gap Variable": {
+    "prefix": "gap",
+    "body": ["var(--gap)"],
+    "description": "Gap variable"
+  },
+  "Nav Width Variable": {
+    "prefix": "navw",
+    "body": ["var(--navW)"],
+    "description": "Navigation width variable"
+  },
+  "Main Color Variable": {
+    "prefix": "mc",
+    "body": ["var(--mc)"],
+    "description": "Main color variable"
+  },
+  "Secondary Color Variable": {
+    "prefix": "sc",
+    "body": ["var(--sc)"],
+    "description": "Secondary color variable"
+  },
+  "Text Color Variable": {
+    "prefix": "tx",
+    "body": ["var(--tx)"],
+    "description": "Text color variable"
+  },
+  "Background Color Variable": {
+    "prefix": "bg",
+    "body": ["var(--bgColor)"],
+    "description": "Background color variable"
+  },
+  "Border Variable": {
+    "prefix": "line",
+    "body": ["var(--line)"],
+    "description": "Border line variable"
+  },
+  "Border Radius Variable": {
+    "prefix": "rad",
+    "body": ["var(--rad)"],
+    "description": "Border radius variable"
+  },
+  "Transition Variable": {
+    "prefix": "tr",
+    "body": ["var(--tr)"],
+    "description": "Transition duration variable"
+  }
+}
+
