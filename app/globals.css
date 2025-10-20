@@ -126,9 +126,7 @@
     }
     
     /* コンパクトサイドバーモード */
-    .draggable-layout.compact_sidebar {
-      --navW: 70px;
-    }
+
   }
 
   [data-theme="dark"] .draggable-layout,
