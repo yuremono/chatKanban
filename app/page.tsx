@@ -340,72 +340,76 @@ export default function Page() {
                 <div style={{
                   width: 'var(--navW)',
                   height: '100%',
-                  backgroundColor: 'var(--navBg)',
-                  borderLeft: 'var(--line)',
-                  borderRight: 'var(--line)',
-                  cursor: 'col-resize',
+                  padding: 'var(--inline)',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background-color 0.3s ease'
+                  flexDirection: 'column',
+                  gap: 'var(--gap)',
+                  cursor: 'col-resize'
                 }}>
-                  <div className="sidebar-compact">
-                    {/* タイトル */}
-                    <div style={{ 
-                      textAlign: 'center', 
-                      fontSize: '0.75rem',
-                      fontWeight: 'bold',
-                      color: 'var(--mc)',
-                      lineHeight: '1.2',
-                      marginBottom: '0.5rem'
-                    }}>
-                      chat<br />kanban
+                  <div 
+                    className="nav_window"
+                    style={{ cursor: 'col-resize' }}
+                  >
+                    <div className="nav_content flex flex-col gap-4 h-full">
+                      <div className="sidebar-compact">
+                        {/* タイトル */}
+                        <div style={{ 
+                          textAlign: 'center', 
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          color: 'var(--mc)',
+                          lineHeight: '1.2',
+                          marginBottom: '0.5rem'
+                        }}>
+                          chat<br />kanban
+                        </div>
+
+                        {/* ダークモードトグル */}
+                        <button
+                          onClick={toggleDarkMode}
+                          className="icon-button"
+                        >
+                          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                        </button>
+
+                        {/* 更新ボタン */}
+                        <button
+                          onClick={fetchTopics}
+                          disabled={loading}
+                          className="icon-button"
+                          style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+                        >
+                          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                        </button>
+
+                        {/* JSONエクスポートボタン */}
+                        <button
+                          onClick={exportJSON}
+                          className="icon-button"
+                        >
+                          <Download className="w-5 h-5" />
+                        </button>
+
+                        {/* 区切り線 */}
+                        <div className="divider" />
+
+                        {/* 検索ボタン */}
+                        <button
+                          onClick={() => setIsSearchOpen(true)}
+                          className="icon-button"
+                        >
+                          <i className="las la-search" style={{ fontSize: '1.5rem' }} />
+                        </button>
+
+                        {/* AIチャットボタン */}
+                        <button
+                          onClick={() => setIsAiChatOpen(true)}
+                          className="icon-button"
+                        >
+                          <MessageCircleMore className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
-
-                    {/* ダークモードトグル */}
-                    <button
-                      onClick={toggleDarkMode}
-                      className="icon-button"
-                    >
-                      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                    </button>
-
-                    {/* 更新ボタン */}
-                    <button
-                      onClick={fetchTopics}
-                      disabled={loading}
-                      className="icon-button"
-                      style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
-                    >
-                      <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-                    </button>
-
-                    {/* JSONエクスポートボタン */}
-                    <button
-                      onClick={exportJSON}
-                      className="icon-button"
-                    >
-                      <Download className="w-5 h-5" />
-                    </button>
-
-                    {/* 区切り線 */}
-                    <div className="divider" />
-
-                    {/* 検索ボタン */}
-                    <button
-                      onClick={() => setIsSearchOpen(true)}
-                      className="icon-button"
-                    >
-                      <i className="las la-search" style={{ fontSize: '1.5rem' }} />
-                    </button>
-
-                    {/* AIチャットボタン */}
-                    <button
-                      onClick={() => setIsAiChatOpen(true)}
-                      className="icon-button"
-                    >
-                      <MessageCircleMore className="w-5 h-5" />
-                    </button>
                   </div>
                 </div>
               </PanelResizeHandle>
