@@ -155,11 +155,13 @@
 
   .app_container.center {
     padding-inline: 0;
+    
   }
 
   /* センターモード時のコンテンツ調整 */
   .app_container.center .content_section {
-    width: calc(50% - var(--navW) / 2);
+    width: calc(50% - var(--navW) / 2 - var(--inline));
+    
   }
 
   /* メインコンテンツエリア */
@@ -168,6 +170,8 @@
     padding: var(--inline);
     gap: var(--gap) var(--navW);
     overflow-y: scroll;
+    height: 100vh;
+
   }
 
   /* コンテンツセクション */
