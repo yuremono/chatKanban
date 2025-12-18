@@ -43,6 +43,12 @@ const InMemoryRepositories = {
       .sort((a, b) => a.index - b.index);
   },
 
+  async listRalliesByTopicIds(topicIds: string[]): Promise<Rally[]> {
+    return Array.from(rallies.values())
+      .filter(r => topicIds.includes(r.topicId))
+      .sort((a, b) => a.index - b.index);
+  },
+
   async createMessage(message: Message): Promise<Message> {
     messages.set(message.id, message);
     return message;
@@ -51,6 +57,12 @@ const InMemoryRepositories = {
   async listMessagesByRallyId(rallyId: string): Promise<Message[]> {
     return Array.from(messages.values())
       .filter(m => m.rallyId === rallyId)
+      .sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1));
+  },
+
+  async listMessagesByRallyIds(rallyIds: string[]): Promise<Message[]> {
+    return Array.from(messages.values())
+      .filter(m => rallyIds.includes(m.rallyId))
       .sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1));
   },
 

@@ -69,6 +69,20 @@ export const SupabaseRepositories = {
     return data || [];
   },
 
+  // 複数トピックのralliesを一括取得（パフォーマンス向上）
+  async listRalliesByTopicIds(topicIds: string[]): Promise<Rally[]> {
+    if (topicIds.length === 0) return [];
+    
+    const { data, error } = await supabase
+      .from('chatkanban_rallies')
+      .select('*')
+      .in('topicId', topicIds)
+      .order('index', { ascending: true });
+    
+    if (error) return [];
+    return data || [];
+  },
+
   // Messages
   async createMessage(message: Message): Promise<Message> {
     const { data, error } = await supabase
@@ -86,6 +100,20 @@ export const SupabaseRepositories = {
       .from('chatkanban_messages')
       .select('*')
       .eq('rallyId', rallyId)
+      .order('timestamp', { ascending: true });
+    
+    if (error) return [];
+    return data || [];
+  },
+
+  // 複数rallyのmessagesを一括取得（パフォーマンス向上）
+  async listMessagesByRallyIds(rallyIds: string[]): Promise<Message[]> {
+    if (rallyIds.length === 0) return [];
+    
+    const { data, error } = await supabase
+      .from('chatkanban_messages')
+      .select('*')
+      .in('rallyId', rallyIds)
       .order('timestamp', { ascending: true });
     
     if (error) return [];

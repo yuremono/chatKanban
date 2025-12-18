@@ -31,28 +31,36 @@ export default function Page() {
   const fetchTopics = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/export', { cache: 'no-store' });
-      const payload = await res.json();
-      if (Array.isArray(payload?.data) && payload.data.length > 0) {
-        setTopics(payload.data.map((d: any) => d.topic));
+      // 初期表示はトピック一覧のみ取得（高速化）
+      const res = await fetch('/api/topics', { cache: 'no-store' });
+      const data = await res.json();
+      
+      if (Array.isArray(data.topics) && data.topics.length > 0) {
+        setTopics(data.topics);
       } else {
-        const t = await fetch('/api/topics', { cache: 'no-store' }).then(r => r.json());
-        if (Array.isArray(t.topics) && t.topics.length > 0) {
-          setTopics(t.topics);
-        } else {
-          try {
-            const defaultRes = await fetch('/defaultExport.json');
-            const defaultPayload = await defaultRes.json();
-            if (Array.isArray(defaultPayload?.data) && defaultPayload.data.length > 0) {
-              setTopics(defaultPayload.data.map((d: any) => d.topic));
-            }
-          } catch (defaultErr) {
-            console.warn('Failed to load default export:', defaultErr);
+        // フォールバック：デフォルトデータを読み込み
+        try {
+          const defaultRes = await fetch('/defaultExport.json');
+          const defaultPayload = await defaultRes.json();
+          if (Array.isArray(defaultPayload?.data) && defaultPayload.data.length > 0) {
+            setTopics(defaultPayload.data.map((d: any) => d.topic));
           }
+        } catch (defaultErr) {
+          console.warn('Failed to load default export:', defaultErr);
         }
       }
     } catch (err) {
       console.error('Failed to fetch topics:', err);
+      // エラー時もフォールバックを試行
+      try {
+        const defaultRes = await fetch('/defaultExport.json');
+        const defaultPayload = await defaultRes.json();
+        if (Array.isArray(defaultPayload?.data) && defaultPayload.data.length > 0) {
+          setTopics(defaultPayload.data.map((d: any) => d.topic));
+        }
+      } catch (defaultErr) {
+        console.warn('All fetch attempts failed');
+      }
     } finally {
       setLoading(false);
     }
