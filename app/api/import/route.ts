@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { ImportBodySchema } from '@/packages/shared/ApiSchemas';
 import { Repositories } from '@/lib/db/Repositories';
 import { resolveImageUrls } from '@/lib/images/ImageResolver';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
+import { supabase } from '@/lib/db/supabase';
 import crypto from 'node:crypto';
 
 export const runtime = 'nodejs';
@@ -32,8 +31,10 @@ export async function POST(req: Request) {
     }
     const body = parse.data;
 
-  // 画像自動解決を無効化（元URLをそのまま保存）
-  // await forceSelfHostAllImages(body).catch(() => {});
+  // 画像自動解決を有効化（lh3のURLをSupabase Storageに保存）
+  await forceSelfHostAllImages(body).catch((err) => {
+    console.error('[Import] Image resolution failed:', err);
+  });
 
   // 保存（インメモリ実装）
   const topicId = `topic_${body.threadId}`;
@@ -95,64 +96,132 @@ const APP_BASE = process.env.APP_BASE_URL || 'http://localhost:3000';
 
 async function forceSelfHostAllImages(body: any) {
   if (!Array.isArray(body?.messages)) return;
-  // 1) dataURLを先に保存
+  
+  console.log('[forceSelfHostAllImages] Starting image resolution for', body.messages.length, 'messages');
+  
+  // 1) dataURLを先に保存（Chrome拡張機能から送られた画像）
   for (const m of body.messages) {
     const meta = m.metadata || {};
     const dataUrls: string[] = Array.isArray(meta.imageDataUrls) ? meta.imageDataUrls : [];
     if (dataUrls.length > 0) {
+      console.log('[forceSelfHostAllImages] Processing', dataUrls.length, 'data URLs');
       const saved: string[] = [];
       for (const d of dataUrls) {
-        const u = await saveDataUrlToUploads(d).catch(() => null);
+        const u = await saveDataUrlToUploads(d).catch((err) => {
+          console.error('[forceSelfHostAllImages] Failed to save dataUrl:', err);
+          return null;
+        });
         if (u) saved.push(u);
       }
       if (saved.length > 0) {
         meta.imageUrls = saved;
         meta.resolvedImageUrls = saved;
         m.metadata = meta;
+        console.log('[forceSelfHostAllImages] Saved', saved.length, 'images from data URLs');
       }
     }
   }
 
-  // 2) 外部URLをサーバ側fetchで保存
+  // 2) 外部URL（lh3.googleusercontent.comなど）をSupabase Storageに保存
   for (const m of body.messages) {
     const meta = m.metadata || {};
     const urls: string[] = Array.isArray(meta.imageUrls) ? meta.imageUrls : [];
     if (urls.length === 0) continue;
-    // すでに /uploads のみならスキップ
-    const need = urls.filter(u => typeof u === 'string' && !u.startsWith('/uploads/'));
-    if (need.length === 0) continue;
-    const resolved = await resolveImageUrls(need, { referer: 'https://gemini.google.com/' }).catch(() => [] as string[]);
-    if (resolved && resolved.length > 0) {
-      const merged = urls.map(u => (u.startsWith('/uploads/') ? u : (resolved.shift() || u)));
-      meta.imageUrls = merged;
-      meta.resolvedImageUrls = merged;
+    
+    // lh3などの外部URLをフィルタ（Supabase StorageのURLは除外）
+    const needFetch = urls.filter(u => {
+      if (!u || typeof u !== 'string') return false;
+      // 既にSupabase StorageのURLなら不要
+      if (u.includes('supabase.co') && u.includes('/storage/v1/object/public/uploads/')) return false;
+      // ローカルの/uploads/も不要（後方互換性）
+      if (u.startsWith('/uploads/')) return false;
+      // lh3など外部URLは保存が必要
+      return true;
+    });
+    
+    if (needFetch.length === 0) continue;
+    
+    console.log('[forceSelfHostAllImages] Fetching', needFetch.length, 'external URLs:', needFetch);
+    
+    const saved: string[] = [];
+    for (const url of needFetch) {
+      try {
+        const supabaseUrl = await fetchAndSaveToSupabase(url);
+        if (supabaseUrl) {
+          saved.push(supabaseUrl);
+          console.log('[forceSelfHostAllImages] Saved external URL to Supabase:', supabaseUrl);
+        }
+      } catch (err) {
+        console.error('[forceSelfHostAllImages] Failed to fetch/save URL:', url, err);
+      }
+    }
+    
+    if (saved.length > 0) {
+      // 元のURLを保存したURLに置き換え
+      const updatedUrls = urls.map(u => {
+        const idx = needFetch.indexOf(u);
+        return idx >= 0 && saved[idx] ? saved[idx] : u;
+      });
+      meta.imageUrls = updatedUrls;
+      meta.resolvedImageUrls = updatedUrls;
       m.metadata = meta;
+      console.log('[forceSelfHostAllImages] Updated URLs:', updatedUrls);
     }
   }
+  
+  console.log('[forceSelfHostAllImages] Image resolution completed');
+}
 
-  // 3) まだ外部URLが残っていれば、CDPで画像本体取得→保存
-  //    （MCPブリッジが動いていない環境ではスキップされるが、他経路で大半は解決済みのはず）
-  const targetId = await guessDevtoolsTargetId(body.sourceUrl).catch(() => null);
-  if (targetId) {
-    for (const m of body.messages) {
-      const meta = m.metadata || {};
-      const urls: string[] = Array.isArray(meta.imageUrls) ? meta.imageUrls : [];
-      const need = urls.filter(u => typeof u === 'string' && !u.startsWith('/uploads/'));
-      if (need.length === 0) continue;
-      const saved: string[] = [];
-      for (const u of need) {
-        const dataUrl = await fetchImageViaDevtools(targetId, u).catch(() => null);
-        if (!dataUrl) continue;
-        const loc = await saveDataUrlToUploads(dataUrl).catch(() => null);
-        if (loc) saved.push(loc);
-      }
-      if (saved.length > 0) {
-        const merged = urls.map(u => (u.startsWith('/uploads/') ? u : (saved.shift() || u)));
-        meta.imageUrls = merged;
-        meta.resolvedImageUrls = merged;
-        m.metadata = meta;
-      }
+// 外部URLをフェッチしてSupabase Storageに保存
+async function fetchAndSaveToSupabase(url: string): Promise<string | null> {
+  try {
+    console.log('[fetchAndSaveToSupabase] Fetching:', url);
+    
+    const headers: Record<string, string> = {
+      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari',
+      'accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+      'cache-control': 'no-cache',
+      'referer': 'https://gemini.google.com/',
+    };
+    
+    const res = await fetch(url, { headers, cache: 'no-store' });
+    if (!res.ok) {
+      console.error('[fetchAndSaveToSupabase] Fetch failed:', res.status, res.statusText);
+      return null;
     }
+    
+    const buf = Buffer.from(await res.arrayBuffer());
+    const contentType = res.headers.get('content-type') || 'image/jpeg';
+    const ext = guessExtByMime(contentType);
+    
+    if (!supabase) {
+      console.error('[fetchAndSaveToSupabase] Supabase not configured');
+      return null;
+    }
+    
+    const fileName = `${Date.now()}_${crypto.randomUUID()}${ext}`;
+    
+    const { data, error } = await supabase.storage
+      .from('uploads')
+      .upload(fileName, buf, {
+        contentType: contentType,
+        upsert: false
+      });
+    
+    if (error) {
+      console.error('[fetchAndSaveToSupabase] Upload error:', error);
+      return null;
+    }
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('uploads')
+      .getPublicUrl(data.path);
+    
+    console.log('[fetchAndSaveToSupabase] Success:', publicUrl);
+    return publicUrl;
+  } catch (err) {
+    console.error('[fetchAndSaveToSupabase] Exception:', err);
+    return null;
   }
 }
 
@@ -163,11 +232,33 @@ async function saveDataUrlToUploads(dataUrl: string): Promise<string> {
   const b64 = match[2];
   const buf = Buffer.from(b64, 'base64');
   const ext = guessExtByMime(mime);
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-  await fs.mkdir(uploadDir, { recursive: true });
+  
+  // Supabase Storageに保存
+  if (!supabase) {
+    console.error('[saveDataUrlToUploads] Supabase not configured');
+    throw new Error('Supabase not configured');
+  }
+  
   const fileName = `${Date.now()}_${crypto.randomUUID()}${ext}`;
-  await fs.writeFile(path.join(uploadDir, fileName), buf);
-  return `/uploads/${fileName}`;
+  
+  const { data, error } = await supabase.storage
+    .from('uploads')
+    .upload(fileName, buf, {
+      contentType: mime,
+      upsert: false
+    });
+  
+  if (error) {
+    console.error('[saveDataUrlToUploads] Upload error:', error);
+    throw new Error(`Upload failed: ${error.message}`);
+  }
+  
+  const { data: { publicUrl } } = supabase.storage
+    .from('uploads')
+    .getPublicUrl(data.path);
+  
+  console.log('[saveDataUrlToUploads] Saved to Supabase Storage:', publicUrl);
+  return publicUrl;
 }
 
 function guessExtByMime(mime: string): string {
