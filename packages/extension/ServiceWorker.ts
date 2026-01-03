@@ -123,15 +123,87 @@ async function fetchInPageAsDataUrlFromSW(url: string): Promise<string | null> {
     const [{ result }] = await chrome.scripting.executeScript({
       target: { tabId },
       func: (u: string) => new Promise<string | null>((resolve) => {
-        fetch(u, { credentials: 'include' })
-          .then(r => r.blob())
-          .then(b => { const fr = new FileReader(); fr.onload = () => resolve(String(fr.result||'')); fr.readAsDataURL(b); })
-          .catch(() => resolve(null));
+        console.log("[fetchInPageAsDataUrlFromSW] Attempting to fetch:", u);
+
+		// 方法1: imgタグ + canvas経由（CORS制限を回避）
+		const img = new Image();
+		img.crossOrigin = "anonymous"; // CORS対応を試みる
+
+		img.onload = () => {
+			try {
+				console.log(
+					"[fetchInPageAsDataUrlFromSW] Image loaded, converting to canvas..."
+				);
+				const canvas = document.createElement("canvas");
+				canvas.width = img.naturalWidth || img.width;
+				canvas.height = img.naturalHeight || img.height;
+				const ctx = canvas.getContext("2d");
+				if (!ctx) {
+					console.error(
+						"[fetchInPageAsDataUrlFromSW] Failed to get canvas context"
+					);
+					resolve(null);
+					return;
+				}
+				ctx.drawImage(img, 0, 0);
+				const dataUrl = canvas.toDataURL("image/png");
+				console.log(
+					"[fetchInPageAsDataUrlFromSW] Success! DataURL length:",
+					dataUrl.length
+				);
+				resolve(dataUrl);
+			} catch (err) {
+				console.error(
+					"[fetchInPageAsDataUrlFromSW] Canvas conversion failed:",
+					err
+				);
+				// フォールバック: fetch を試す
+				fetch(u, { credentials: "include" })
+					.then((r) => r.blob())
+					.then((b) => {
+						const fr = new FileReader();
+						fr.onload = () => resolve(String(fr.result || ""));
+						fr.readAsDataURL(b);
+					})
+					.catch((fetchErr) => {
+						console.error(
+							"[fetchInPageAsDataUrlFromSW] Fetch also failed:",
+							fetchErr
+						);
+						resolve(null);
+					});
+			}
+		};
+
+		img.onerror = (err) => {
+			console.error(
+				"[fetchInPageAsDataUrlFromSW] Image load failed:",
+				err
+			);
+			// フォールバック: fetch を試す
+			fetch(u, { credentials: "include" })
+				.then((r) => r.blob())
+				.then((b) => {
+					const fr = new FileReader();
+					fr.onload = () => resolve(String(fr.result || ""));
+					fr.readAsDataURL(b);
+				})
+				.catch((fetchErr) => {
+					console.error(
+						"[fetchInPageAsDataUrlFromSW] Fetch also failed:",
+						fetchErr
+					);
+					resolve(null);
+				});
+		};
+
+		img.src = u;
       }),
       args: [url]
     }) as any;
     return (result as string) || null;
-  } catch {
+  } catch (err) {
+    console.error('[fetchInPageAsDataUrlFromSW] Exception:', err);
     return null;
   }
 }

@@ -39,15 +39,15 @@ export async function POST(req: Request) {
   // 保存（インメモリ実装）
   const topicId = `topic_${body.threadId}`;
   await Repositories.createTopic({
-    id: topicId,
-    userId: 'anonymous',
-    title: body.title,
-    tags: [],
-    visibility: 'private',
-    deletedAt: null,
-    userName: body.userName,
-    chatTitle: body.chatTitle,
-    model: body.model,
+		id: topicId,
+		userId: "anonymous",
+		title: body.title,
+		tags: [],
+		visibility: "private",
+		deletedAt: null,
+		userName: body.userName,
+		chatTitle: body.chatTitle,
+		model: body.model,
   });
   // ユーザー発話でラリーを分割
   const rallyIds: string[] = [];

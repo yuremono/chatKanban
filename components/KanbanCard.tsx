@@ -114,151 +114,314 @@ export function KanbanCard({ topic, onPreview }: KanbanCardProps) {
   }, [open, topic.id, rallies.length]);
 
   return (
-    <section className="content_section  shadow-sm overflow-hidden">
-      {/* トピックヘッダー */}
-      <div
-        className="topic_header transition-colors p-6 flex items-start justify-between gap-6"
-        onClick={() => setOpen(!open)}
-        style={{ cursor: 'pointer' }}
-      >
-        <div className="flex-1 min-w-0">
-          <h2 
-            className="topic_title  font-medium leading-tight mb-0"
-            onDoubleClick={(e) => {
-              e.stopPropagation();
-              if (onPreview) {
-                onPreview(topic.id);
-              }
-            }}
-            style={{ cursor: 'pointer' }}
-          >
-            {topic.chatTitle || topic.title}
-          </h2>
-          <div className="topic_meta mt-3 flex items-center gap-4  flex-wrap">
-            {topic.userName && <span className="user_name font-medium">{topic.userName}</span>}
-            {topic.model && <span className="px-2.5 py-0.5 rounded-full font-medium" style={{ backgroundColor: 'var(--sc)', color: 'var(--wh)' }}>{topic.model}</span>}
-            <span>{formatDate(topic.createdAt)}</span>
-          </div>
-        </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onPreview) {
-              onPreview(topic.id);
-            }
-          }}
-          className="flex items-center gap-2 flex-shrink-0 p-2 rounded transition-colors"
-          style={{ border: '1px solid var(--borderColor)' }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = 'var(--bc)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-        >
-          <Eye className="w-4 h-4" style={{ color: 'var(--tx)' }} />
-        </button>
-      </div>
+		<section className="content_section  shadow-sm overflow-hidden">
+			{/* トピックヘッダー */}
+			<div
+				className="topic_header transition-colors p-6 flex items-start justify-between gap-6"
+				onClick={() => setOpen(!open)}
+				style={{ cursor: "pointer" }}
+			>
+				<div className="flex-1 min-w-0">
+					<h2
+						className="topic_title  font-medium leading-tight mb-0"
+						onDoubleClick={(e) => {
+							e.stopPropagation();
+							if (onPreview) {
+								onPreview(topic.id);
+							}
+						}}
+						style={{ cursor: "pointer" }}
+					>
+						{topic.chatTitle || topic.title}
+					</h2>
+					<div className="topic_meta mt-3 flex items-center gap-4  flex-wrap">
+						{topic.userName && (
+							<span className="user_name font-medium">
+								{topic.userName}
+							</span>
+						)}
+						{topic.model && (
+							<span
+								className="px-2.5 py-0.5 rounded-full font-medium"
+								style={{
+									backgroundColor: "var(--sc)",
+									color: "var(--wh)",
+								}}
+							>
+								{topic.model}
+							</span>
+						)}
+						<span>{formatDate(topic.createdAt)}</span>
+					</div>
+				</div>
+				<button
+					onClick={(e) => {
+						e.stopPropagation();
+						if (onPreview) {
+							onPreview(topic.id);
+						}
+					}}
+					className="flex items-center gap-2 flex-shrink-0 p-2 rounded transition-colors"
+					style={{ border: "1px solid var(--borderColor)" }}
+					onMouseOver={(e) => {
+						e.currentTarget.style.backgroundColor = "var(--bc)";
+					}}
+					onMouseOut={(e) => {
+						e.currentTarget.style.backgroundColor = "transparent";
+					}}
+				>
+					<Eye className="w-4 h-4" style={{ color: "var(--tx)" }} />
+				</button>
+			</div>
 
-      {/* ラリー一覧 */}
-      {open && (
-        <div className="rally_list_bg">
-          {rallies.length === 0 ? (
-            <div className="flex items-center justify-center gap-2 px-8" style={{ height: '3.6em' }}>
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: 'var(--mc)' }} />
-              <p className="text-sm" style={{ color: 'var(--tx)' }}>Loading...</p>
-            </div>
-          ) : (
-            <div style={{ borderColor: 'var(--borderColor)' }} className="divide-y">
-              {rallies.map((rally) => (
-                <div key={rally.id} className="rally_header">
-                  {/* ラリーヘッダー */}
-                  <div
-                    className="rally_header_text px-8 py-4 cursor-pointer transition-colors flex items-center gap-3 font-medium"
-                    onClick={() => toggleRally(rally.id)}
-                  >
-                    {ralliesOpen[rally.id] ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
-                    Rally #{rally.index + 1}
-                  </div>
+			{/* ラリー一覧 */}
+			{open && (
+				<div className="rally_list_bg">
+					{rallies.length === 0 ? (
+						<div
+							className="flex items-center justify-center gap-2 px-8"
+							style={{ height: "3.6em" }}
+						>
+							<Loader2
+								className="w-5 h-5 animate-spin"
+								style={{ color: "var(--mc)" }}
+							/>
+							<p
+								className="text-sm"
+								style={{ color: "var(--tx)" }}
+							>
+								Loading...
+							</p>
+						</div>
+					) : (
+						<div
+							style={{ borderColor: "var(--borderColor)" }}
+							className="divide-y"
+						>
+							{rallies.map((rally) => (
+								<div key={rally.id} className="rally_header">
+									{/* ラリーヘッダー */}
+									<div
+										className="rally_header_text px-8 py-4 cursor-pointer transition-colors flex items-center gap-3 font-medium"
+										onClick={() => toggleRally(rally.id)}
+									>
+										{ralliesOpen[rally.id] ? (
+											<ChevronDown className="w-4 h-4" />
+										) : (
+											<ChevronRight className="w-4 h-4" />
+										)}
+										Rally #{rally.index + 1}
+									</div>
 
-                  {/* メッセージ一覧 */}
-                  {ralliesOpen[rally.id] && (
-                    <div className="px-8 pb-10 pt-4">
-                      {loadingRallies[rally.id] ? (
-                        <div className="flex flex-col items-center justify-center py-12">
-                          <Loader2 className="w-8 h-8 mb-3 animate-spin" style={{ color: 'var(--mc)' }} />
-                          <p className="text-sm" style={{ color: 'var(--tx)' }}>Loading...</p>
-                        </div>
-                      ) : (messagesByRally[rally.id] || []).map((m, idx) => {
-                        const isExpanded = expandedRallies[rally.id];
-                        const lines = m.content.split('\n');
-                        const shouldTruncate = lines.length > 3 && !isExpanded;
-                        const displayContent = shouldTruncate ? lines.slice(0, 3).join('\n') + '...' : m.content;
+									{/* メッセージ一覧 */}
+									{ralliesOpen[rally.id] && (
+										<div className="px-8 pb-10 pt-4">
+											{loadingRallies[rally.id] ? (
+												<div className="flex flex-col items-center justify-center py-12">
+													<Loader2
+														className="w-8 h-8 mb-3 animate-spin"
+														style={{
+															color: "var(--mc)",
+														}}
+													/>
+													<p
+														className="text-sm"
+														style={{
+															color: "var(--tx)",
+														}}
+													>
+														Loading...
+													</p>
+												</div>
+											) : (
+												(
+													messagesByRally[rally.id] ||
+													[]
+												).map((m, idx) => {
+													const isExpanded =
+														expandedRallies[
+															rally.id
+														];
+													const lines =
+														m.content.split("\n");
+													const shouldTruncate =
+														lines.length > 3 &&
+														!isExpanded;
+													const displayContent =
+														shouldTruncate
+															? lines
+																	.slice(0, 3)
+																	.join(
+																		"\n"
+																	) + "..."
+															: m.content;
 
-                        return (
-                        <div
-                          key={idx}
-                          className={`flex gap-4 mb-4 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`w-full sm:max-w-[75%] px-4 py-3 break-words ${
-                              m.role === 'user'
-                                ? 'message_user rounded-[1em_0_1em_1em]'
-                                : 'message_assistant rounded-[0_1em_1em_1em]'
-                            }`}
-                            onClick={() => shouldTruncate && toggleRallyExpand(rally.id)}
-                            style={{ cursor: shouldTruncate ? 'pointer' : 'default' }}
-                          >
-                            <div className="whitespace-pre-wrap break-words leading-[1.6]">
-                              {displayContent}
-                            </div>
+													return (
+														<div
+															key={idx}
+															className={`flex gap-4 mb-4 ${
+																m.role ===
+																"user"
+																	? "justify-end"
+																	: "justify-start"
+															}`}
+														>
+															<div
+																className={`w-full sm:max-w-[75%] px-4 py-3 break-words ${
+																	m.role ===
+																	"user"
+																		? "message_user rounded-[1em_0_1em_1em]"
+																		: "message_assistant rounded-[0_1em_1em_1em]"
+																}`}
+																onClick={() =>
+																	shouldTruncate &&
+																	toggleRallyExpand(
+																		rally.id
+																	)
+																}
+																style={{
+																	cursor: shouldTruncate
+																		? "pointer"
+																		: "default",
+																}}
+															>
+																<div className="whitespace-pre-wrap break-words leading-[1.6]">
+																	{
+																		displayContent
+																	}
+																</div>
 
-                            {/* 画像リンク */}
-                            {Array.isArray(m.metadata?.imageDataUrls) &&
-                              m.metadata.imageDataUrls.length > 0 && (
-                                <div className="flex flex-col gap-2 mt-2">
-                                  {m.metadata.imageDataUrls.map((src: string, i: number) => (
-                                    <ImageLinkRow key={i} src={src} />
-                                  ))}
-                                </div>
-                              )}
-                            {(!m.metadata?.imageDataUrls || (m.metadata.imageDataUrls as any[]).length === 0) &&
-                              Array.isArray(m.metadata?.resolvedImageUrls) &&
-                              (m.metadata.resolvedImageUrls as any[]).length > 0 && (
-                                <div className="flex flex-col gap-2 mt-2">
-                                  {m.metadata.resolvedImageUrls.map((src: string, i: number) => (
-                                    <ImageLinkRow key={i} src={src} />
-                                  ))}
-                                </div>
-                              )}
-                            {(!m.metadata?.imageDataUrls || (m.metadata.imageDataUrls as any[]).length === 0) &&
-                              (!m.metadata?.resolvedImageUrls || (m.metadata.resolvedImageUrls as any[]).length === 0) &&
-                              Array.isArray(m.metadata?.imageUrls) &&
-                              (m.metadata.imageUrls as any[]).length > 0 && (
-                                <div className="flex flex-col gap-2 mt-2">
-                                  {m.metadata.imageUrls
-                                    .filter((src: string) => typeof src === 'string')
-                                    .map((src: string, i: number) => (
-                                      <ImageLinkRow key={i} src={src} />
-                                    ))}
-                                </div>
-                              )}
-                          </div>
-                        </div>
-                      );
-                      })}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </section>
+																{/* 画像リンク */}
+																{Array.isArray(
+																	m.metadata
+																		?.imageDataUrls
+																) &&
+																	m.metadata
+																		.imageDataUrls
+																		.length >
+																		0 && (
+																		<div className="flex flex-col gap-2 mt-2">
+																			{m.metadata.imageDataUrls.map(
+																				(
+																					src: string,
+																					i: number
+																				) => (
+																					<ImageLinkRow
+																						key={
+																							i
+																						}
+																						src={
+																							src
+																						}
+																					/>
+																				)
+																			)}
+																		</div>
+																	)}
+																{(!m.metadata
+																	?.imageDataUrls ||
+																	(
+																		m
+																			.metadata
+																			.imageDataUrls as any[]
+																	).length ===
+																		0) &&
+																	Array.isArray(
+																		m
+																			.metadata
+																			?.resolvedImageUrls
+																	) &&
+																	(
+																		m
+																			.metadata
+																			.resolvedImageUrls as any[]
+																	).length >
+																		0 && (
+																		<div className="flex flex-col gap-2 mt-2">
+																			{m.metadata.resolvedImageUrls.map(
+																				(
+																					src: string,
+																					i: number
+																				) => (
+																					<ImageLinkRow
+																						key={
+																							i
+																						}
+																						src={
+																							src
+																						}
+																					/>
+																				)
+																			)}
+																		</div>
+																	)}
+																{(!m.metadata
+																	?.imageDataUrls ||
+																	(
+																		m
+																			.metadata
+																			.imageDataUrls as any[]
+																	).length ===
+																		0) &&
+																	(!m.metadata
+																		?.resolvedImageUrls ||
+																		(
+																			m
+																				.metadata
+																				.resolvedImageUrls as any[]
+																		)
+																			.length ===
+																			0) &&
+																	Array.isArray(
+																		m
+																			.metadata
+																			?.imageUrls
+																	) &&
+																	(
+																		m
+																			.metadata
+																			.imageUrls as any[]
+																	).length >
+																		0 && (
+																		<div className="flex flex-col gap-2 mt-2">
+																			{m.metadata.imageUrls
+																				.filter(
+																					(
+																						src: string
+																					) =>
+																						typeof src ===
+																						"string"
+																				)
+																				.map(
+																					(
+																						src: string,
+																						i: number
+																					) => (
+																						<ImageLinkRow
+																							key={
+																								i
+																							}
+																							src={
+																								src
+																							}
+																						/>
+																					)
+																				)}
+																		</div>
+																	)}
+															</div>
+														</div>
+													);
+												})
+											)}
+										</div>
+									)}
+								</div>
+							))}
+						</div>
+					)}
+				</div>
+			)}
+		</section>
   );
 }

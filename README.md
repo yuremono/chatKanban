@@ -2,6 +2,10 @@
 
 ChatGPTやGoogle Geminiのチャット履歴を管理するカンバンボードアプリケーションです。
 
+[**Live Demo (https://chat-kanban.vercel.app/)**](https://chat-kanban.vercel.app/)
+
+※本プロジェクトは個人開発であり、開発効率を優先するためプルリクエストを経由せず、メインブランチへの直接コミットを中心に構築しています。
+
 ## 機能
 
 - **チャット履歴の可視化**: ChatGPTやGeminiのチャット履歴をカード形式で表示

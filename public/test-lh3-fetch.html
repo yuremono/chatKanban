@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LH3 Image Fetch Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        input { width: 80%; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; }
+        #result { margin-top: 20px; white-space: pre-wrap; }
+        #image { margin-top: 20px; max-width: 500px; }
+    </style>
+</head>
+<body>
+    <h1>LH3 Image Fetch Test</h1>
+    <p>このテストで、Geminiの画像URLがブラウザから取得可能か確認します。</p>
+    
+    <input type="text" id="imageUrl" placeholder="lh3.googleusercontent.com のURLを貼り付け">
+    <br>
+    <button onclick="testFetch()">Fetch Test</button>
+    
+    <div id="result"></div>
+    <img id="image" style="display:none;">
+    
+    <script>
+        async function testFetch() {
+            const url = document.getElementById('imageUrl').value;
+            const result = document.getElementById('result');
+            const img = document.getElementById('image');
+            
+            result.textContent = 'Testing...';
+            img.style.display = 'none';
+            
+            try {
+                console.log('Fetching:', url);
+                
+                // テスト1: 直接fetch
+                const response = await fetch(url, {
+                    credentials: 'include',
+                    mode: 'cors'
+                });
+                
+                console.log('Response:', response);
+                
+                if (!response.ok) {
+                    result.textContent = `❌ Fetch failed: ${response.status} ${response.statusText}\n\n`;
+                    result.textContent += 'この画像はブラウザから直接取得できません。\n';
+                    result.textContent += 'Googleが意図的にCORSを制限している可能性があります。';
+                    return;
+                }
+                
+                // テスト2: Blobに変換
+                const blob = await response.blob();
+                console.log('Blob:', blob);
+                
+                // テスト3: DataURLに変換
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const dataUrl = reader.result;
+                    result.textContent = `✅ Success!\n\n`;
+                    result.textContent += `Content-Type: ${blob.type}\n`;
+                    result.textContent += `Size: ${blob.size} bytes\n`;
+                    result.textContent += `DataURL length: ${dataUrl.length} characters\n\n`;
+                    result.textContent += 'この画像はブラウザから取得可能です！';
+                    
+                    // 画像を表示
+                    img.src = dataUrl;
+                    img.style.display = 'block';
+                };
+                reader.readAsDataURL(blob);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                result.textContent = `❌ Error: ${error.message}\n\n`;
+                result.textContent += 'CORSエラーまたはネットワークエラーです。\n';
+                result.textContent += 'この画像はブラウザから直接取得できません。';
+            }
+        }
+    </script>
+</body>
+</html>
+
