@@ -28,15 +28,18 @@ export async function GET() {
     }
     
     // uploadsバケットが存在するか確認
-    const uploadsBucket = buckets?.find(b => b.id === 'uploads');
+    const uploadsBucket = buckets?.find(
+		(b: { id: string }) => b.id === "uploads"
+	);
     
     if (!uploadsBucket) {
       return NextResponse.json({
-        ok: false,
-        error: 'uploads bucket not found',
-        buckets: buckets?.map(b => b.id),
-        message: 'Please run supabase-storage-bucket.sql in Supabase SQL Editor',
-      });
+			ok: false,
+			error: "uploads bucket not found",
+			buckets: buckets?.map((b: { id: string }) => b.id),
+			message:
+				"Please run supabase-storage-bucket.sql in Supabase SQL Editor",
+		});
     }
     
     // テスト用の小さな画像をアップロード
